@@ -2,12 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
 public class Marching : MonoBehaviour
 {
 
-	List<Vector3> vertices = new List<Vector3>();
-	List<int> triangles = new List<int>();
-
+	/*
 	private void Start()
 	{
 
@@ -16,30 +15,54 @@ public class Marching : MonoBehaviour
 		PopulateTerrainMap();
 		CreateMeshData();
 
-	}
+	}*/
 
 	
 	// Performs Marching cubes on a single cube
 	// input: positon and the cubes 8 vertices
 	void MarchCube(Vector3 position, float[] cube)
 	{
-		int flagIndex, edgeIndex;
+		int cubeIndex, edgeIndex;
 
-		int flagIndex = 0;
+		int cubeIndex = 0;
 		// Find which corners/vertices are inside or outside the surface
 		for (v = 0; v < 8; v++)
 		{
-			if (cube[v] < 0)
+			if (cube[v] > 0)
 				// Shifts 1 to left by 'v' bits. v=3 -> 0000 1000 = 8
-				flagIndex |= 1 << v;
+				cubeIndex |= 1 << v;
 		}
 
 		// If the configuration of this cube is 0 or 255 (completely inside the terrain or completely outside of it) we don't need to do anything.
-		if (flagIndex == 0 || flagIndex == 255)
+		if (cubeIndex == 0 || cubeIndex == 255)
 			return;
 
 		// Find which edges are intersected by the surface
-		edgeIndex = edgeTable[flagIndex]; // returns 12 bit number
+		//edgeIndex = edgeTable[flagIndex]; // returns 12 bit number 
+
+		// Find right set of triangles. Super advanced loop
+		for(int i = 0; TriangleTable[cubeIndex][i] != -1; i += 3)
+        {
+			Vector3 vert0a = EdgeTable[ TriangleTable[cubeIndex][i], 0];
+			Vector3 vert0b = EdgeTable[ TriangleTable[cubeIndex][i], 1];
+
+			Vector3 vert1a = EdgeTable[ TriangleTable[cubeIndex][i+1], 0];
+			Vector3 vert1b = EdgeTable[ TriangleTable[cubeIndex][i+1], 1];
+
+			Vector3 vert2a = EdgeTable[ TriangleTable[cubeIndex][i+2], 0];
+			Vector3 vert2b = EdgeTable[ TriangleTable[cubeIndex][i+2], 1];
+
+			// Create vertex in middle of each edge
+			Vector3 vert0 = (vert0a + vert0b) / 2;
+			Vector3 vert1 = (vert1a + vert1b) / 2;
+			Vector3 vert2 = (vert2a + vert2b) / 2;
+
+			vertices.Add(vert0);
+			vertices.Add(vert1);
+			vertices.Add(vert2);
+
+			triangles.Add(vertices.Count - 1);
+		}
 
 		/*
 		// Get the configuration index of this cube.

@@ -2,23 +2,27 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Marchingtables : MonoBehaviour
+public class terrainGenerator : MonoBehaviour
 {
+	List<Vector3> vertices = new List<Vector3>();
+	List<int> triangles = new List<int>();
 
-    float terrainSurface = 0.5f;
-    int width = 32;
-    int height = 8;
-    float[,,] terrainMap;
+	float terrainSurface = 0.5f;
+	int width = 32;
+	int height = 8;
+	float[,,] terrainMap;
 
-    private void Start()
-    {
+	Marching marching = GameObject.GetComponent<Marching>();
 
-        meshFilter = GetComponent<MeshFilter>();
-        terrainMap = new float[width + 1, height + 1, width + 1];
-        PopulateTerrainMap();
-        CreateMeshData();
+	private void Start()
+	{
 
-    }
+		meshFilter = GetComponent<MeshFilter>();
+		terrainMap = new float[width + 1, height + 1, width + 1];
+		PopulateTerrainMap();
+		CreateMeshData();
+
+	}
 
 	void CreateMeshData()
 	{
@@ -42,7 +46,8 @@ public class Marchingtables : MonoBehaviour
 					}
 
 					// Pass the value into our MarchCube function.
-					MarchCube(new Vector3(x, y, z), cube);
+
+					marching.MarchCube(new Vector3(x, y, z), cube);
 
 				}
 			}
