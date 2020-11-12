@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class Marching : MonoBehaviour
 {
+	bool isUpdated = false;
 	MeshFilter meshFilter;
 
 	List<Vector3> vertices = new List<Vector3>();
@@ -39,10 +40,14 @@ public class Marching : MonoBehaviour
 
 	private void Update()
     {
-		//ClearMesh();
-		//generateTerrain();
-		//CreateMesh();
-		//BuildMesh();
+		if (isUpdated == true)
+		{
+			ClearMesh();
+			generateTerrain();
+			CreateMesh();
+			BuildMesh();
+			isUpdated = false;
+		}
 	}
 
 	void CreateMesh()
@@ -98,20 +103,21 @@ public class Marching : MonoBehaviour
 		}
     }
 
-	//private void Update()
-	//{
+    //private void Update()
+    //{
 
-	//	//if (Input.GetKeyDown(KeyCode.Space))
-	//	//{
-	//	//	_config++;
-	//	//	ClearMesh();
-	//	//	MarchCube(Vector3.zero, _config);
-	//	//	BuildMesh();
-	//	//	Debug.Log("space pressed");
-	//	//}
-	//}
+    //    //if (Input.GetKeyDown(KeyCode.Space))
+    //    //{
+    //    //	_config++;
+    //    //	ClearMesh();
+    //    //	MarchCube(Vector3.zero, _config);
+    //    //	BuildMesh();
+    //    //	Debug.Log("space pressed");
+    //    //}
+		
+    //}
 
-	void BuildMesh()
+    void BuildMesh()
 	{
 
 		Mesh mesh = new Mesh();
@@ -127,6 +133,12 @@ public class Marching : MonoBehaviour
 		vertices.Clear();
 		triangles.Clear();
     }
+
+
+    void OnValidate()
+    {
+		isUpdated = true;
+	}
 
 	// Performs Marching cubes on a single cube
 	// input: positon and the cubes 8 vertices
