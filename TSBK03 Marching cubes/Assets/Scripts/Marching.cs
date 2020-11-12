@@ -13,11 +13,12 @@ public class Marching : MonoBehaviour
 	float[,,] terrainMap;
 
 	int width = 64;
-	int height = 20;
+	int height = 64;
 
 	public int _config = -1;
-	public float noiseParam = 16f;
-	public ComputeShader noiseShader;
+	public float Scale = 16f;
+	public float Amplitude = 1.0f;
+	//public ComputeShader noiseShader;
 
 	private void Start()
     {
@@ -85,22 +86,50 @@ public class Marching : MonoBehaviour
 					//float noise = (float)height * Mathf.PerlinNoise((float)x / noiseParam + 0.001f, (float)z / noiseParam + 0.001f);
 
 					//noiseShader.SetVector("Pos", new Vector3(x,y,z));
-					noise = Perlin3D(x / noiseParam, y / noiseParam, z / noiseParam);
+					
+					noise = (Amplitude * Perlin3D(x / Scale, y / Scale, z / Scale))+;
 
 					float point = 0;
 
-					if (y <= noise - 0.5f)
+					if (y > noise + 0.5f)
                     {
-						point = 0;
+                        point = (float)y - noise;
                     }
-					else if(y > noise + 0.5f)
+                    else if (y > noise)
                     {
-						point = (float)y - noise;
+                        point = noise - (float)y;
                     }
-					else if(y > noise)
-                    {
-						point = noise - (float)y;
-                    }
+
+					if (x > noise + 0.5f)
+					{
+						point += (float)x - noise;
+					}
+					else if (x > noise)
+					{
+						point += noise - (float)x;
+					}
+
+					if (z > noise + 0.5f)
+					{
+						point += (float)z - noise;
+					}
+					else if (z > noise)
+					{
+						point += noise - (float)z;
+					}
+
+					//if (y <= noise - 0.5f)
+					//               {
+					//	point = 0;
+					//               }
+					//else if(y > noise + 0.5f)
+					//               {
+					//	point = (float)y - noise;
+					//               }
+					//else if(y > noise)
+					//               {
+					//	point = noise - (float)y;
+					//               }
 
 					terrainMap[x, y, z] = point;
 				}
