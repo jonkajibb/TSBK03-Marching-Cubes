@@ -9,9 +9,15 @@ public class Marching : MonoBehaviour
 
 	List<Vector3> vertices = new List<Vector3>();
 	List<int> triangles = new List<int>();
-	public int _config = -1;
+	float[,,] terrainMap;
 
-    private void Start()
+	int width = 64;
+	int height = 20;
+
+	public int _config = -1;
+	public float noiseParam = 16f;
+
+	private void Start()
     {
 
 		//meshFilter = GetComponent<MeshFilter>();
@@ -19,24 +25,91 @@ public class Marching : MonoBehaviour
 		//PopulateTerrainMap();
 		//CreateMeshData();
 		meshFilter = GetComponent<MeshFilter>();
+		terrainMap = new float[width + 1, height + 1, width + 1]; // +1 to get every corner
 
-		//float[] cube = { 0.0f, 0.5f, -1.0f, 0.2f, 0.5f, 0.1f, -0.3f, -0.9f };
+		generateTerrain();
 
-        //MarchCube(Vector3.zero, _config);
-		//BuildMesh();
-    }
+		//ClearMesh();
+		//MarchCube(terrainMap, _config);
+
+		CreateMesh();
+		BuildMesh();
+		Debug.Log("space pressed");
+	}
 
 	private void Update()
+    {
+		//ClearMesh();
+		//generateTerrain();
+		//CreateMesh();
+		//BuildMesh();
+	}
+
+	void CreateMesh()
 	{
-		if (Input.GetKeyDown(KeyCode.Space))
+		for (int x = 0; x < width; x++)
 		{
-			_config++;
-			ClearMesh();
-			MarchCube(Vector3.zero, _config);
-			BuildMesh();
-			Debug.Log("space pressed");
+			for (int y = 0; y < height; y++)
+			{
+				for (int z = 0; z < width; z++)
+				{
+					float[] cube = new float[8];
+					for (int i = 0; i < 8; i++)
+					{
+						Vector3Int corner = new Vector3Int(x, y, z) + CornerTable[i];
+						cube[i] = terrainMap[corner.x, corner.y, corner.z];
+					}
+
+					MarchCube(new Vector3(x, y, z), cube);
+				}
+			}
 		}
 	}
+
+	void generateTerrain()
+    {
+		for(int x = 0; x < width + 1; x++)
+        {
+			for (int y = 0; y < height + 1; y++)
+			{
+				for (int z = 0; z < width + 1; z++)
+				{
+
+					float noise = (float)height * Mathf.PerlinNoise((float)x / noiseParam + 0.001f, (float)z / noiseParam + 0.001f);
+
+					float point = 0;
+
+					if (y <= noise - 0.5f)
+                    {
+						point = 0;
+                    } 
+					else if(y > noise + 0.5f)
+                    {
+						point = (float)y - noise;
+                    } 
+					else if(y > noise)
+                    {
+						point = noise - (float)y;
+                    }
+
+					terrainMap[x, y, z] = point;
+				}
+			}
+		}
+    }
+
+	//private void Update()
+	//{
+
+	//	//if (Input.GetKeyDown(KeyCode.Space))
+	//	//{
+	//	//	_config++;
+	//	//	ClearMesh();
+	//	//	MarchCube(Vector3.zero, _config);
+	//	//	BuildMesh();
+	//	//	Debug.Log("space pressed");
+	//	//}
+	//}
 
 	void BuildMesh()
 	{
@@ -57,21 +130,22 @@ public class Marching : MonoBehaviour
 
 	// Performs Marching cubes on a single cube
 	// input: positon and the cubes 8 vertices
-	void MarchCube(Vector3 position, int index)//float[] cube)
+	void MarchCube(Vector3 position, float[] cube)
 	{
-		int cubeIndex = index;
+		int cubeIndex = 0;
 
-		// Find which corners/vertices are inside or outside the surface
-		//for (int v = 0; v < 8; v++)
-		//{
-		//	if (cube[v] > 0)
-		//		// Shifts 1 to left by 'v' bits. v=3 -> 0000 1000 = 8
-		//		cubeIndex |= 1 << v;
-		//}
-		
+        //Find which corners / vertices are inside or outside the surface
 
-		// If the configuration of this cube is 0 or 255 (completely inside the terrain or completely outside of it) we don't need to do anything.
-		if (cubeIndex == 0 || cubeIndex == 255)
+        for (int v = 0; v < 8; v++)
+        {
+            if (cube[v] > 0)
+                // Shifts 1 to left by 'v' bits. v=3 -> 0000 1000 = 8
+                cubeIndex |= 1 << v;
+        }
+
+
+        // If the configuration of this cube is 0 or 255 (completely inside the terrain or completely outside of it) we don't need to do anything.
+        if (cubeIndex == 0 || cubeIndex == 255)
 			return;
 
 		// Find which edges are intersected by the surface
@@ -93,6 +167,48 @@ public class Marching : MonoBehaviour
 
 			Vector3 vert2a = position + EdgeTable[ TriangleTable[cubeIndex, i+2], 0];
 			Vector3 vert2b = position + EdgeTable[ TriangleTable[cubeIndex, i+2], 1];
+
+			// Create vertex in middle of each edge
+			Vector3 vert0 = (vert0a + vert0b) * 0.5f;
+			Vector3 vert1 = (vert1a + vert1b) * 0.5f;
+			Vector3 vert2 = (vert2a + vert2b) * 0.5f;
+
+			vertices.Add(vert0);
+			triangles.Add(vertices.Count - 1);
+			vertices.Add(vert1);
+			triangles.Add(vertices.Count - 1);
+			vertices.Add(vert2);
+			triangles.Add(vertices.Count - 1);
+		}
+	}
+
+	void MarchSingleCube(Vector3 position, int index)
+	{
+		int cubeIndex = index;
+
+		// If the configuration of this cube is 0 or 255 (completely inside the terrain or completely outside of it) we don't need to do anything.
+		if (cubeIndex == 0 || cubeIndex == 255)
+			return;
+
+		// Find which edges are intersected by the surface
+		//edgeIndex = edgeTable[flagIndex]; // returns 12 bit number 
+
+		// Find right set of triangles. Super advanced loop
+		for (int i = 0; i < 16; i += 3)
+		{
+			if (TriangleTable[cubeIndex, i] == -1)
+			{
+				return;
+			}
+
+			Vector3 vert0a = position + EdgeTable[TriangleTable[cubeIndex, i], 0];
+			Vector3 vert0b = position + EdgeTable[TriangleTable[cubeIndex, i], 1];
+
+			Vector3 vert1a = position + EdgeTable[TriangleTable[cubeIndex, i + 1], 0];
+			Vector3 vert1b = position + EdgeTable[TriangleTable[cubeIndex, i + 1], 1];
+
+			Vector3 vert2a = position + EdgeTable[TriangleTable[cubeIndex, i + 2], 0];
+			Vector3 vert2b = position + EdgeTable[TriangleTable[cubeIndex, i + 2], 1];
 
 			// Create vertex in middle of each edge
 			Vector3 vert0 = (vert0a + vert0b) * 0.5f;
