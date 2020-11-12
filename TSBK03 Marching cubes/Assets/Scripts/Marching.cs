@@ -16,6 +16,7 @@ public class Marching : MonoBehaviour
 
 	public int _config = -1;
 	public float noiseParam = 16f;
+	public ComputeShader noiseShader;
 
 	private void Start()
     {
@@ -36,15 +37,7 @@ public class Marching : MonoBehaviour
 		BuildMesh();
 		Debug.Log("space pressed");
 	}
-
-	private void Update()
-    {
-		//ClearMesh();
-		//generateTerrain();
-		//CreateMesh();
-		//BuildMesh();
-	}
-
+	
 	void CreateMesh()
 	{
 		for (int x = 0; x < width; x++)
@@ -68,6 +61,7 @@ public class Marching : MonoBehaviour
 
 	void generateTerrain()
     {
+		float noise = 0;
 		for(int x = 0; x < width + 1; x++)
         {
 			for (int y = 0; y < height + 1; y++)
@@ -75,7 +69,10 @@ public class Marching : MonoBehaviour
 				for (int z = 0; z < width + 1; z++)
 				{
 
-					float noise = (float)height * Mathf.PerlinNoise((float)x / noiseParam + 0.001f, (float)z / noiseParam + 0.001f);
+					//float noise = (float)height * Mathf.PerlinNoise((float)x / noiseParam + 0.001f, (float)z / noiseParam + 0.001f);
+
+					//noiseShader.SetVector("Pos", new Vector3(x,y,z));
+					noise = Perlin3D(x / noiseParam, y / noiseParam, z / noiseParam);
 
 					float point = 0;
 
@@ -223,6 +220,23 @@ public class Marching : MonoBehaviour
 			triangles.Add(vertices.Count - 1);
 		}
 	}
+
+	//https://www.youtube.com/watch?v=Aga0TBJkchM&ab_channel=Carlpilot
+	public static float Perlin3D(float x, float y, float z)
+	{
+		float AB = Mathf.PerlinNoise(x, y);
+		float BC = Mathf.PerlinNoise(y, z);
+		float AC = Mathf.PerlinNoise(x, z);
+
+		float BA = Mathf.PerlinNoise(y, x);
+		float CB = Mathf.PerlinNoise(z, y);
+		float CA = Mathf.PerlinNoise(z, x);
+
+		float ABC = AB + BC + AC + BA + CB + CA;
+		ABC = ABC / 6.0f;
+
+		return ABC;
+    }
 
 	Vector3Int[] CornerTable = new Vector3Int[8] {
 
