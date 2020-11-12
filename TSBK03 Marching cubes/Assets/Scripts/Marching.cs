@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class Marching : MonoBehaviour
 {
+	bool isUpdated = false;
 	MeshFilter meshFilter;
 
 	List<Vector3> vertices = new List<Vector3>();
@@ -37,7 +38,19 @@ public class Marching : MonoBehaviour
 		BuildMesh();
 		Debug.Log("space pressed");
 	}
-	
+
+	private void Update()
+    {
+		if (isUpdated == true)
+		{
+			ClearMesh();
+			generateTerrain();
+			CreateMesh();
+			BuildMesh();
+			isUpdated = false;
+		}
+	}
+
 	void CreateMesh()
 	{
 		for (int x = 0; x < width; x++)
@@ -79,11 +92,11 @@ public class Marching : MonoBehaviour
 					if (y <= noise - 0.5f)
                     {
 						point = 0;
-                    } 
+                    }
 					else if(y > noise + 0.5f)
                     {
 						point = (float)y - noise;
-                    } 
+                    }
 					else if(y > noise)
                     {
 						point = noise - (float)y;
@@ -95,20 +108,21 @@ public class Marching : MonoBehaviour
 		}
     }
 
-	//private void Update()
-	//{
+    //private void Update()
+    //{
 
-	//	//if (Input.GetKeyDown(KeyCode.Space))
-	//	//{
-	//	//	_config++;
-	//	//	ClearMesh();
-	//	//	MarchCube(Vector3.zero, _config);
-	//	//	BuildMesh();
-	//	//	Debug.Log("space pressed");
-	//	//}
-	//}
+    //    //if (Input.GetKeyDown(KeyCode.Space))
+    //    //{
+    //    //	_config++;
+    //    //	ClearMesh();
+    //    //	MarchCube(Vector3.zero, _config);
+    //    //	BuildMesh();
+    //    //	Debug.Log("space pressed");
+    //    //}
 
-	void BuildMesh()
+    //}
+
+    void BuildMesh()
 	{
 
 		Mesh mesh = new Mesh();
@@ -124,6 +138,12 @@ public class Marching : MonoBehaviour
 		vertices.Clear();
 		triangles.Clear();
     }
+
+
+    void OnValidate()
+    {
+		isUpdated = true;
+	}
 
 	// Performs Marching cubes on a single cube
 	// input: positon and the cubes 8 vertices
@@ -146,7 +166,7 @@ public class Marching : MonoBehaviour
 			return;
 
 		// Find which edges are intersected by the surface
-		//edgeIndex = edgeTable[flagIndex]; // returns 12 bit number 
+		//edgeIndex = edgeTable[flagIndex]; // returns 12 bit number
 
 		// Find right set of triangles. Super advanced loop
 		for(int i = 0; i < 16; i += 3)
@@ -188,7 +208,7 @@ public class Marching : MonoBehaviour
 			return;
 
 		// Find which edges are intersected by the surface
-		//edgeIndex = edgeTable[flagIndex]; // returns 12 bit number 
+		//edgeIndex = edgeTable[flagIndex]; // returns 12 bit number
 
 		// Find right set of triangles. Super advanced loop
 		for (int i = 0; i < 16; i += 3)
