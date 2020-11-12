@@ -56,7 +56,6 @@
   </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\Scripts\Marching.cs" />
-     <Compile Include="Assets\Scripts\terrainGenerator.cs" />
  <Reference Include="UnityEngine">
  <HintPath>D:/Program Files/2019.4.13f1/Editor/Data/Managed/UnityEngine/UnityEngine.dll</HintPath>
  </Reference>

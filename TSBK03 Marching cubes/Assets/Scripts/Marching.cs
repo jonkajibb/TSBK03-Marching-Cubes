@@ -5,24 +5,28 @@ using UnityEngine;
 
 public class Marching : MonoBehaviour
 {
+	List<Vector3> vertices = new List<Vector3>();
+	List<int> triangles = new List<int>();
+	public int _config = 1;
 
-	/*
 	private void Start()
 	{
 
 		meshFilter = GetComponent<MeshFilter>();
-		terrainMap = new float[width + 1, height + 1, width + 1];
-		PopulateTerrainMap();
-		CreateMeshData();
+		//terrainMap = new float[width + 1, height + 1, width + 1];
+		//PopulateTerrainMap();
+		//CreateMeshData();
 
-	}*/
+		MarchCube(Vector3.zero, _config);
+
+	}
 
 	
 	// Performs Marching cubes on a single cube
 	// input: positon and the cubes 8 vertices
-	void MarchCube(Vector3 position, float[] cube)
+	void MarchCube(Vector3 position, int cubeIndex)//float[] cube)
 	{
-		int cubeIndex, edgeIndex;
+		/*int cubeIndex, edgeIndex;
 
 		int cubeIndex = 0;
 		// Find which corners/vertices are inside or outside the surface
@@ -32,6 +36,7 @@ public class Marching : MonoBehaviour
 				// Shifts 1 to left by 'v' bits. v=3 -> 0000 1000 = 8
 				cubeIndex |= 1 << v;
 		}
+		*/
 
 		// If the configuration of this cube is 0 or 255 (completely inside the terrain or completely outside of it) we don't need to do anything.
 		if (cubeIndex == 0 || cubeIndex == 255)
@@ -63,44 +68,6 @@ public class Marching : MonoBehaviour
 
 			triangles.Add(vertices.Count - 1);
 		}
-
-		/*
-		// Get the configuration index of this cube.
-		int configIndex = GetCubeConfiguration(cube);
-
-		// If the configuration of this cube is 0 or 255 (completely inside the terrain or completely outside of it) we don't need to do anything.
-		if (configIndex == 0 || configIndex == 255)
-			return;
-
-		// Loop through the triangles. There are never more than 5 triangles to a cube and only three vertices to a triangle.
-		int edgeIndex = 0;
-		for (int i = 0; i < 5; i++)
-		{
-			for (int p = 0; p < 3; p++)
-			{
-
-				// Get the current indice. We increment triangleIndex through each loop.
-				int indice = TriangleTable[configIndex, edgeIndex];
-
-				// If the current edgeIndex is -1, there are no more indices and we can exit the function.
-				if (indice == -1)
-					return;
-
-				// Get the vertices for the start and end of this edge.
-				Vector3 vert1 = position + EdgeTable[indice, 0];
-				Vector3 vert2 = position + EdgeTable[indice, 1];
-
-				// Get the midpoint of this edge.
-				Vector3 vertPosition = (vert1 + vert2) / 2f;
-
-				// Add to our vertices and triangles list and incremement the edgeIndex.
-				vertices.Add(vertPosition);
-				triangles.Add(vertices.Count - 1);
-				edgeIndex++;
-
-			}
-		}
-		*/
 	}
 
 	int GetCubeConfiguration(float[] cube)
