@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+using static Unity.Mathematics.math;
 
 public class Marching : MonoBehaviour
 {
+	
 	bool isUpdated = false;
 	MeshFilter meshFilter;
 
@@ -12,8 +14,8 @@ public class Marching : MonoBehaviour
 	List<int> triangles = new List<int>();
 	float[,,] terrainMap;
 
-	int width = 64;
-	int height = 64;
+	int width = 32;
+	int height = 32;
 
 	public int _config = -1;
 	public float Scale = 16f;
@@ -75,7 +77,8 @@ public class Marching : MonoBehaviour
 
 	void generateTerrain()
     {
-		float noise = 0;
+		float density;
+		float noise;
 		for(int x = 0; x < width + 1; x++)
         {
 			for (int y = 0; y < height + 1; y++)
@@ -85,38 +88,43 @@ public class Marching : MonoBehaviour
 
 					//float noise = (float)height * Mathf.PerlinNoise((float)x / noiseParam + 0.001f, (float)z / noiseParam + 0.001f);
 
-					//noiseShader.SetVector("Pos", new Vector3(x,y,z));
-					
-					noise = (Amplitude * Perlin3D(x / Scale, y / Scale, z / Scale))+;
+					density = y;
+					noise = Unity.Mathematics.noise.snoise(float3(x, y, z) / Scale); // between -1 and 1
+					//noise = Mathf.PerlinNoise((float)x / Scale, (float)z / Scale); // between -1 and 1
+					//noise = (noise + 1.0f) * 0.5f;
+					//Debug.Log(noise);
+					density += noise;
 
-					float point = 0;
+					//noise = Unity.Mathematics.noise.snoise(float3(x,y,z) / Scale);
 
-					if (y > noise + 0.5f)
-                    {
-                        point = (float)y - noise;
-                    }
-                    else if (y > noise)
-                    {
-                        point = noise - (float)y;
-                    }
+					//float point = 0;
 
-					if (x > noise + 0.5f)
-					{
-						point += (float)x - noise;
-					}
-					else if (x > noise)
-					{
-						point += noise - (float)x;
-					}
+					//if (y > noise + 0.5f)
+					//               {
+					//                   point = (float)y - noise;
+					//               }
+					//               else if (y > noise)
+					//               {
+					//                   point = noise - (float)y;
+					//               }
 
-					if (z > noise + 0.5f)
-					{
-						point += (float)z - noise;
-					}
-					else if (z > noise)
-					{
-						point += noise - (float)z;
-					}
+					//if (x > noise + 0.5f)
+					//{
+					//	point += (float)x - noise;
+					//}
+					//else if (x > noise)
+					//{
+					//	point += noise - (float)x;
+					//}
+
+					//if (z > noise + 0.5f)
+					//{
+					//	point += (float)z - noise;
+					//}
+					//else if (z > noise)
+					//{
+					//	point += noise - (float)z;
+					//}
 
 					//if (y <= noise - 0.5f)
 					//               {
@@ -131,7 +139,7 @@ public class Marching : MonoBehaviour
 					//	point = noise - (float)y;
 					//               }
 
-					terrainMap[x, y, z] = point;
+					terrainMap[x, y, z] = density;
 				}
 			}
 		}

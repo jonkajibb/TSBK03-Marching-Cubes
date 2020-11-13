@@ -611,6 +611,12 @@
  <Reference Include="UnityEditor.UI">
  <HintPath>D:/Projekt/TSBK03-Marching-Cubes/TSBK03 Marching cubes/Library/ScriptAssemblies/UnityEditor.UI.dll</HintPath>
  </Reference>
+ <Reference Include="Unity.Mathematics">
+ <HintPath>D:/Projekt/TSBK03-Marching-Cubes/TSBK03 Marching cubes/Library/ScriptAssemblies/Unity.Mathematics.dll</HintPath>
+ </Reference>
+ <Reference Include="Unity.Mathematics.Editor">
+ <HintPath>D:/Projekt/TSBK03-Marching-Cubes/TSBK03 Marching cubes/Library/ScriptAssemblies/Unity.Mathematics.Editor.dll</HintPath>
+ </Reference>
   </ItemGroup>
   <ItemGroup>
   </ItemGroup>
