@@ -14,12 +14,12 @@ public class Marching : MonoBehaviour
 	List<int> triangles = new List<int>();
 	float[,,] terrainMap;
 
-	int width = 32;
-	int height = 32;
+	int width = 64;
+	int height = 13;
 
 	public int _config = -1;
-	public float Scale = 16f;
-	public float Amplitude = 1.0f;
+	public float Scale = 24f;
+	public float Amplitude = 8.0f;
 	//public ComputeShader noiseShader;
 
 	private void Start()
@@ -88,12 +88,15 @@ public class Marching : MonoBehaviour
 
 					//float noise = (float)height * Mathf.PerlinNoise((float)x / noiseParam + 0.001f, (float)z / noiseParam + 0.001f);
 
-					density = y;
-					noise = Unity.Mathematics.noise.snoise(float3(x, y, z) / Scale); // between -1 and 1
+					density = -y;
+					noise = Amplitude*(1.0f-Mathf.Abs(Unity.Mathematics.noise.snoise(float3(x, y, z) / Scale))); // between -1 and 1
 					//noise = Mathf.PerlinNoise((float)x / Scale, (float)z / Scale); // between -1 and 1
 					//noise = (noise + 1.0f) * 0.5f;
 					//Debug.Log(noise);
+					//noise = 1f-abs(noise);
+					//density *= Amplitude;
 					density += noise;
+					
 
 					//noise = Unity.Mathematics.noise.snoise(float3(x,y,z) / Scale);
 
@@ -192,7 +195,7 @@ public class Marching : MonoBehaviour
 
         for (int v = 0; v < 8; v++)
         {
-            if (cube[v] > 0)
+            if (cube[v] < 0)
                 // Shifts 1 to left by 'v' bits. v=3 -> 0000 1000 = 8
                 cubeIndex |= 1 << v;
         }

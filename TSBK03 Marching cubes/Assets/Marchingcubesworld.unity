@@ -389,4 +389,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _config: 1
-  noiseParam: 16
+  Scale: 13
+  Amplitude: 11.5
