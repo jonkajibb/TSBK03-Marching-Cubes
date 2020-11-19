@@ -14,27 +14,52 @@ public class Marching : MonoBehaviour
 	List<int> triangles = new List<int>();
 	float[,,] terrainMap;
 
-	int width = 64;
-	int height = 13;
+	int width = 32;
+	int height = 32;
+
+	//int sideLength = 64;
 
 	public int _config = -1;
-	public float Scale = 24f;
-	public float Amplitude = 8.0f;
-	//public ComputeShader noiseShader;
+	public float Frequency = 1.0f;
+	public float Amplitude = 1.0f;
+	public int Octaves = 3;
+	
+	//public ComputeShader computeDensity;
+	//private ComputeBuffer densityBuffer; // Carries noise data
+
+	//private float[] densityArray;
 
 	private void Start()
     {
+		/*
+		int kernel = computeDensity.FindKernel("Density");
 
+
+		densityBuffer = new ComputeBuffer(sideLength * sideLength * sideLength, sizeof(float));
+
+		computeDensity.SetBuffer(kernel, "Result", densityBuffer);
+
+		computeDensity.Dispatch(kernel,
+			sideLength / 8,
+			sideLength / 8,
+			sideLength / 8);
+
+		densityArray = new float[64 * 64 * 64];
+
+		densityBuffer.GetData(densityArray);
+
+		densityBuffer.Release();
+		*/
 		//meshFilter = GetComponent<MeshFilter>();
-		//terrainMap = new float[width + 1, height + 1, width + 1];
+		terrainMap = new float[width + 1, height + 1, width + 1];
 		//PopulateTerrainMap();
 		//CreateMeshData();
 		meshFilter = GetComponent<MeshFilter>();
-		terrainMap = new float[width + 1, height + 1, width + 1]; // +1 to get every corner
+		//terrainMap = new float[width + 1, height + 1, width + 1]; // +1 to get every corner
 
 		generateTerrain();
 
-		//ClearMesh();
+		ClearMesh();
 		//MarchCube(terrainMap, _config);
 
 		CreateMesh();
@@ -42,15 +67,20 @@ public class Marching : MonoBehaviour
 		Debug.Log("space pressed");
 	}
 
+	private void Run()
+    {
+		ClearMesh();
+		generateTerrain();
+		CreateMesh();
+		BuildMesh();
+		isUpdated = false;
+	}
+
 	private void Update()
     {
 		if (isUpdated == true)
 		{
-			ClearMesh();
-			generateTerrain();
-			CreateMesh();
-			BuildMesh();
-			isUpdated = false;
+			Run();
 		}
 	}
 
@@ -67,6 +97,9 @@ public class Marching : MonoBehaviour
 					{
 						Vector3Int corner = new Vector3Int(x, y, z) + CornerTable[i];
 						cube[i] = terrainMap[corner.x, corner.y, corner.z];
+						//cube[i] = densityArray[z * 64 * 64 + y * 64 + x];
+
+						//Debug.Log(cube[i]);
 					}
 
 					MarchCube(new Vector3(x, y, z), cube);
@@ -76,78 +109,70 @@ public class Marching : MonoBehaviour
 	}
 
 	void generateTerrain()
-    {
+	{
 		float density;
-		float noise;
-		for(int x = 0; x < width + 1; x++)
-        {
+		float freq;
+		float amp;
+		float maxVal = 0;
+		for (int x = 0; x < width + 1; x++)
+		{
 			for (int y = 0; y < height + 1; y++)
 			{
 				for (int z = 0; z < width + 1; z++)
 				{
+					//pos = float3(x, y, z) * Scale;
+					//density = 1.0f - Mathf.Abs(Unity.Mathematics.noise.snoise(pos));
 
-					//float noise = (float)height * Mathf.PerlinNoise((float)x / noiseParam + 0.001f, (float)z / noiseParam + 0.001f);
 
 					density = -y;
-					noise = Amplitude*(1.0f-Mathf.Abs(Unity.Mathematics.noise.snoise(float3(x, y, z) / Scale))); // between -1 and 1
+					amp = Amplitude;
+					freq = Frequency;
+					// Octaves
+					for (int i = 0; i < Octaves; i++)
+					{
+						density += Mathf.Pow(1.0f - Mathf.Abs(Unity.Mathematics.noise.snoise(float3(x, y, z) * Frequency)),2) * Amplitude;
+						amp *= 2.0f;
+						freq *= 0.5f;
+					}
+
+
+
+					/*
+					density += 2.0f * (1.0f - Mathf.Abs(Unity.Mathematics.noise.snoise(4.0f * Amplitude * float3(x, y, z) / Scale)));
+					density += 4.0f * (1.0f - Mathf.Abs(Unity.Mathematics.noise.snoise(2.0f * Amplitude * float3(x, y, z) / Scale)));
+					density += 8.0f * (1.0f - Mathf.Abs(Unity.Mathematics.noise.snoise(1.0f * Amplitude * float3(x, y, z) / Scale)));
+					*/
+
+
 					//noise = Mathf.PerlinNoise((float)x / Scale, (float)z / Scale); // between -1 and 1
 					//noise = (noise + 1.0f) * 0.5f;
 					//Debug.Log(noise);
 					//noise = 1f-abs(noise);
 					//density *= Amplitude;
-					density += noise;
-					
 
-					//noise = Unity.Mathematics.noise.snoise(float3(x,y,z) / Scale);
-
-					//float point = 0;
-
-					//if (y > noise + 0.5f)
-					//               {
-					//                   point = (float)y - noise;
-					//               }
-					//               else if (y > noise)
-					//               {
-					//                   point = noise - (float)y;
-					//               }
-
-					//if (x > noise + 0.5f)
-					//{
-					//	point += (float)x - noise;
-					//}
-					//else if (x > noise)
-					//{
-					//	point += noise - (float)x;
-					//}
-
-					//if (z > noise + 0.5f)
-					//{
-					//	point += (float)z - noise;
-					//}
-					//else if (z > noise)
-					//{
-					//	point += noise - (float)z;
-					//}
-
-					//if (y <= noise - 0.5f)
-					//               {
-					//	point = 0;
-					//               }
-					//else if(y > noise + 0.5f)
-					//               {
-					//	point = (float)y - noise;
-					//               }
-					//else if(y > noise)
-					//               {
-					//	point = noise - (float)y;
-					//               }
 
 					terrainMap[x, y, z] = density;
+
+					if (terrainMap[x, y, z] > maxVal)
+						maxVal = terrainMap[x, y, z];
+
+
 				}
 			}
 		}
-    }
 
+		for (int x = 0; x < width + 1; x++)
+		{
+			for (int y = 0; y < height + 1; y++)
+			{
+				for (int z = 0; z < width + 1; z++)
+				{
+					terrainMap[x, y, z] = terrainMap[x, y, z] / maxVal;
+				}
+			}
+		}
+	}
+	
     //private void Update()
     //{
 

@@ -389,5 +389,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _config: 1
-  Scale: 13
+  Scale: 64
   Amplitude: 11.5
