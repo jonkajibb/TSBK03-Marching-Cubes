@@ -389,5 +389,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _config: 1
-  Scale: 64
-  Amplitude: 11.5
+  Frequency: 1
+  Amplitude: 1
+  Octaves: 3
+  computeShader: {fileID: 7200000, guid: 63a9538a23c9b6a47b0cfc4618cdb388, type: 3}

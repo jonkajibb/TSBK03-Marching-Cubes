@@ -1,32 +1,54 @@
 ﻿// Each #kernel tells which function to compile; you can have many kernels
-#pragma kernel Density
+#pragma kernel CSMain
 
 #include "Noise.compute"
 
 // Create a RenderTexture with enableRandomWrite flag and set it
 // with cs.SetTexture
 
-//RWTexture3D<float> Result;
-RWStructuredBuffer<float> Result;
+//RWTexture3D<float> Output;
+RWStructuredBuffer<float> densityData;
 
-//float Tex3DRes;
+int sideLength = 32;
 
-int indexFromCoord(int x, int y, int z) {
-    return z * 64 * 64 + y * 64 + x;
+int Octaves = 3;
+float Amplitude = 3.0f;
+float Frequency = 0.1f;
+float maxVal = 0.0f;
+
+int indexFromCoord(int x, int y, int z, int w) {
+    return z * w * w + y * w + x;
 }
 
 // 8*8*8 since 3D texture
 [numthreads(8,8,8)]
-void Density (uint3 id : SV_DispatchThreadID)
+void CSMain (uint3 id : SV_DispatchThreadID)
 {
+    int index = indexFromCoord(id.x, id.y, id.z, sideLength);
+
     float density = 0;
+    //float[] terrainMap = new float[width + 1, height + 1, width + 1];
 
-    float3 ws = (float3)id.xyz; // / Tex3DRes;
+    //-----------------
+	density = -id.y;
+	float amp = Amplitude;
+	float freq = Frequency;
+	// Octaves
+	for (int i = 0; i < Octaves; i++)
+	{
+		density += 1.0f - snoise(id.xyz);
+		density += (1.0f - snoise(id.xyz / sideLength * Frequency)) * Amplitude;
+		amp *= 2.0f;
+		freq *= 0.5f;
+	}
 
-    density = -ws.y;
+	densityData[index] = density;
 
-    density += snoise(ws);
+	if (densityData[index] > maxVal)
+		maxVal = densityData[index];
 
-    Result[indexFromCoord(id.x, id.y, id.z)] = density;
+    //-----------------
+
+    densityData[index] = density;
 
 }
