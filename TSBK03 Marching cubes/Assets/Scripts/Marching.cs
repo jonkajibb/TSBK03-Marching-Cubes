@@ -17,62 +17,26 @@ public class Marching : MonoBehaviour
 	int width = 32;
 	int height = 32;
 
-	//int sideLength = 64;
-
 	public int _config = -1;
 	public float Frequency = 1.0f;
 	public float Amplitude = 1.0f;
 	public int Octaves = 3;
-	
-	//public ComputeShader computeDensity;
-	//private ComputeBuffer densityBuffer; // Carries noise data
-
-	//private float[] densityArray;
 
 	private void Start()
     {
-		/*
-		int kernel = computeDensity.FindKernel("Density");
-
-
-		densityBuffer = new ComputeBuffer(sideLength * sideLength * sideLength, sizeof(float));
-
-		computeDensity.SetBuffer(kernel, "Result", densityBuffer);
-
-		computeDensity.Dispatch(kernel,
-			sideLength / 8,
-			sideLength / 8,
-			sideLength / 8);
-
-		densityArray = new float[64 * 64 * 64];
-
-		densityBuffer.GetData(densityArray);
-
-		densityBuffer.Release();
-		*/
-		//meshFilter = GetComponent<MeshFilter>();
 		terrainMap = new float[width + 1, height + 1, width + 1];
-		//PopulateTerrainMap();
-		//CreateMeshData();
 		meshFilter = GetComponent<MeshFilter>();
-		//terrainMap = new float[width + 1, height + 1, width + 1]; // +1 to get every corner
-
-		generateTerrain();
-
-		ClearMesh();
-		//MarchCube(terrainMap, _config);
-
-		CreateMesh();
-		BuildMesh();
+		
+		Run();
 		Debug.Log("space pressed");
 	}
 
 	private void Run()
     {
 		ClearMesh();
-		generateTerrain();
-		CreateMesh();
-		BuildMesh();
+		generateTerrain(); // Generates terrain with noise
+		CreateMesh(); // Marching cubes is called here
+		BuildMesh(); // Build mesh using triangle and vertex array
 		isUpdated = false;
 	}
 
@@ -97,9 +61,6 @@ public class Marching : MonoBehaviour
 					{
 						Vector3Int corner = new Vector3Int(x, y, z) + CornerTable[i];
 						cube[i] = terrainMap[corner.x, corner.y, corner.z];
-						//cube[i] = densityArray[z * 64 * 64 + y * 64 + x];
-
-						//Debug.Log(cube[i]);
 					}
 
 					MarchCube(new Vector3(x, y, z), cube);
@@ -120,10 +81,6 @@ public class Marching : MonoBehaviour
 			{
 				for (int z = 0; z < width + 1; z++)
 				{
-					//pos = float3(x, y, z) * Scale;
-					//density = 1.0f - Mathf.Abs(Unity.Mathematics.noise.snoise(pos));
-
-
 					density = -y;
 					amp = Amplitude;
 					freq = Frequency;
@@ -134,22 +91,6 @@ public class Marching : MonoBehaviour
 						amp *= 2.0f;
 						freq *= 0.5f;
 					}
-
-
-
-					/*
-					density += 2.0f * (1.0f - Mathf.Abs(Unity.Mathematics.noise.snoise(4.0f * Amplitude * float3(x, y, z) / Scale)));
-					density += 4.0f * (1.0f - Mathf.Abs(Unity.Mathematics.noise.snoise(2.0f * Amplitude * float3(x, y, z) / Scale)));
-					density += 8.0f * (1.0f - Mathf.Abs(Unity.Mathematics.noise.snoise(1.0f * Amplitude * float3(x, y, z) / Scale)));
-					*/
-
-
-					//noise = Mathf.PerlinNoise((float)x / Scale, (float)z / Scale); // between -1 and 1
-					//noise = (noise + 1.0f) * 0.5f;
-					//Debug.Log(noise);
-					//noise = 1f-abs(noise);
-					//density *= Amplitude;
-
 
 					terrainMap[x, y, z] = density;
 
@@ -172,20 +113,6 @@ public class Marching : MonoBehaviour
 			}
 		}
 	}
-	
-    //private void Update()
-    //{
-
-    //    //if (Input.GetKeyDown(KeyCode.Space))
-    //    //{
-    //    //	_config++;
-    //    //	ClearMesh();
-    //    //	MarchCube(Vector3.zero, _config);
-    //    //	BuildMesh();
-    //    //	Debug.Log("space pressed");
-    //    //}
-
-    //}
 
     void BuildMesh()
 	{
@@ -305,23 +232,6 @@ public class Marching : MonoBehaviour
 			triangles.Add(vertices.Count - 1);
 		}
 	}
-
-	//https://www.youtube.com/watch?v=Aga0TBJkchM&ab_channel=Carlpilot
-	public static float Perlin3D(float x, float y, float z)
-	{
-		float AB = Mathf.PerlinNoise(x, y);
-		float BC = Mathf.PerlinNoise(y, z);
-		float AC = Mathf.PerlinNoise(x, z);
-
-		float BA = Mathf.PerlinNoise(y, x);
-		float CB = Mathf.PerlinNoise(z, y);
-		float CA = Mathf.PerlinNoise(z, x);
-
-		float ABC = AB + BC + AC + BA + CB + CA;
-		ABC = ABC / 6.0f;
-
-		return ABC;
-    }
 
 	Vector3Int[] CornerTable = new Vector3Int[8] {
 
