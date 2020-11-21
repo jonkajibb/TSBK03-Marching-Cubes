@@ -15,70 +15,61 @@ public class Marching : MonoBehaviour
 	float[,,] terrainMap;
 	private float[] densityArray;
 
-	int width = 32;
-	int height = 32;
+	//int width = 32;
+	//int height = 32;
 
-	int chunkSize = 32;
+	const int chunkSize = 32;
+	const int numPointsPerAxis = chunkSize + 1;
+	const int numPoints = numPointsPerAxis * numPointsPerAxis * numPointsPerAxis;
 
 	const int threadGroupSize = 8;
+	int kernel;
 
 	public int _config = -1;
 	public float Frequency = 1.0f;
 	public float Amplitude = 1.0f;
 	public int Octaves = 3;
 	
-	public ComputeShader computeShader;
-	private ComputeBuffer voxelBuffer; // Carries noise data
+	public ComputeShader shader;
+	private ComputeBuffer pointsBuffer; // Carries noise data
 
 	
 
 	private void Start()
     {
-		int kernel = computeShader.FindKernel("CSMain");
+		kernel = shader.FindKernel("CSMain");
 
-		int arraySize = (chunkSize + 1) * (chunkSize + 1) * (chunkSize + 1); // +1 since corners
-
-		int numPointsPerAxis = chunkSize + 1;
-		int numThreadsPerAxis = Mathf.CeilToInt(chunkSize / (float)threadGroupSize);
-
-		// 1-D array of noise scalars
-		voxelBuffer = new ComputeBuffer(arraySize, sizeof(float));
-
-		//terrainMap = new float[width + 1, height + 1, width + 1];
-
-		computeShader.SetBuffer(kernel, "densityData", voxelBuffer);
-		//computeDensity.SetFloat("sideLength", chunkSize);
-
-		computeShader.Dispatch(kernel, numThreadsPerAxis, numThreadsPerAxis, numThreadsPerAxis);
-
-		densityArray = new float[(chunkSize + 1) * (chunkSize + 1) * (chunkSize + 1)];
-
-		voxelBuffer.GetData(densityArray);
-		voxelBuffer.Release();
+		// Buffer for the noise values in a chunk
 		
-		//meshFilter = GetComponent<MeshFilter>();
-		
-		//PopulateTerrainMap();
-		//CreateMeshData();
+
 		meshFilter = GetComponent<MeshFilter>();
-		//terrainMap = new float[width + 1, height + 1, width + 1]; // +1 to get every corner
-
-		//generateTerrain();
-
-		ClearMesh();
-		//MarchCube(terrainMap, _config);
-
-		CreateMesh();
-		BuildMesh();
-		Debug.Log("space pressed");
+		
+		Run();
 	}
 
 	private void Run()
     {
+		pointsBuffer = new ComputeBuffer(numPoints, sizeof(float));
+
+		shader.SetBuffer(kernel, "densityData", pointsBuffer);
+		shader.SetInt("numPointsPerAxis", numPointsPerAxis);
+		shader.SetInt("Octaves", Octaves);
+		shader.SetFloat("Amplitude", Amplitude);
+		shader.SetFloat("Frequency", Frequency);
+
+		shader.Dispatch(kernel, chunkSize / threadGroupSize, chunkSize / threadGroupSize, chunkSize / threadGroupSize);
+
+		densityArray = new float[numPoints];
+		//Debug.Log(densityArray);
+		pointsBuffer.GetData(densityArray);
+
 		ClearMesh();
 		//generateTerrain();
 		CreateMesh();
 		BuildMesh();
+
+		pointsBuffer.Release();
+
 		isUpdated = false;
 	}
 
@@ -92,19 +83,23 @@ public class Marching : MonoBehaviour
 
 	void CreateMesh()
 	{
-		for (int x = 0; x < width; x++)
+
+		// (x,y,z) is VOXEL POSITION
+		for (int x = 0; x < chunkSize; x++)
 		{
-			for (int y = 0; y < height; y++)
+			for (int y = 0; y < chunkSize; y++)
 			{
-				for (int z = 0; z < width; z++)
+				for (int z = 0; z < chunkSize; z++)
 				{
 					float[] cube = new float[8];
 					for (int i = 0; i < 8; i++)
 					{
+						// Find corners of voxel
 						Vector3Int corner = new Vector3Int(x, y, z) + CornerTable[i];
-						//cube[i] = terrainMap[corner.x, corner.y, corner.z];
 
-						cube[i] = densityArray[z * chunkSize * chunkSize + y * chunkSize + x];
+						// Indexing of flattened 3D array, index = x + N * (y + N*z)
+						cube[i] = densityArray[corner.z * numPointsPerAxis * numPointsPerAxis + corner.y * numPointsPerAxis + corner.x];
+						
 					}
 
 					MarchCube(new Vector3(x, y, z), cube);
@@ -119,11 +114,11 @@ public class Marching : MonoBehaviour
 		float freq;
 		float amp;
 		float maxVal = 0;
-		for (int x = 0; x < width + 1; x++)
+		for (int x = 0; x < chunkSize + 1; x++)
 		{
-			for (int y = 0; y < height + 1; y++)
+			for (int y = 0; y < chunkSize + 1; y++)
 			{
-				for (int z = 0; z < width + 1; z++)
+				for (int z = 0; z < chunkSize + 1; z++)
 				{
 					density = -y;
 					amp = Amplitude;
@@ -146,11 +141,11 @@ public class Marching : MonoBehaviour
 			}
 		}
 
-		for (int x = 0; x < width + 1; x++)
+		for (int x = 0; x < chunkSize + 1; x++)
 		{
-			for (int y = 0; y < height + 1; y++)
+			for (int y = 0; y < chunkSize + 1; y++)
 			{
-				for (int z = 0; z < width + 1; z++)
+				for (int z = 0; z < chunkSize + 1; z++)
 				{
 					terrainMap[x, y, z] = terrainMap[x, y, z] / maxVal;
 				}

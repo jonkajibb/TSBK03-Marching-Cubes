@@ -3,52 +3,67 @@
 
 #include "Noise.compute"
 
-// Create a RenderTexture with enableRandomWrite flag and set it
-// with cs.SetTexture
-
-//RWTexture3D<float> Output;
+// Buffer to write to
 RWStructuredBuffer<float> densityData;
 
-int sideLength = 32;
+// Variables set in C# script
 
-int Octaves = 3;
-float Amplitude = 3.0f;
-float Frequency = 0.1f;
-float maxVal = 0.0f;
+// voxel data
+int chunkSize;
+int numPointsPerAxis;
+
+// noise params
+int Octaves;
+float Amplitude;
+float Frequency;
 
 int indexFromCoord(int x, int y, int z, int w) {
     return z * w * w + y * w + x;
+	//return x + y * w + z * w * w;
 }
 
 // 8*8*8 since 3D texture
 [numthreads(8,8,8)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
-    int index = indexFromCoord(id.x, id.y, id.z, sideLength);
+	int index = indexFromCoord(id.x, id.y, id.z, numPointsPerAxis);
 
-    float density = 0;
+	float3 coord = id.xyz;
+	float density;
+	float amp = Amplitude;
+	float freq = Frequency;
+	float maxVal;
+
+	/*
+	if (id.x > numPointsPerAxis || id.y > numPointsPerAxis || id.z > numPointsPerAxis) {
+		//densityData[index] = 0;
+		return;
+	}*/
+
+    
     //float[] terrainMap = new float[width + 1, height + 1, width + 1];
 
     //-----------------
-	density = -id.y;
-	float amp = Amplitude;
-	float freq = Frequency;
+	//density = -id.y;
+	
 	// Octaves
-	for (int i = 0; i < Octaves; i++)
+
+	density = id.y;
+	density = -density;
+	density += (1.0 - snoise(coord / numPointsPerAxis * freq)) * amp;
+	/*for (int i = 0; i < Octaves; i++)
 	{
-		density += 1.0f - snoise(id.xyz);
-		density += (1.0f - snoise(id.xyz / sideLength * Frequency)) * Amplitude;
+		//density += 1.0f - snoise(id.xyz);
+		density += snoise(coord / 32 * freq) * amp;
 		amp *= 2.0f;
 		freq *= 0.5f;
-	}
+	}*/
 
-	densityData[index] = density;
-
+	/*
 	if (densityData[index] > maxVal)
 		maxVal = densityData[index];
-
+	*/
     //-----------------
-
-    densityData[index] = density;
+	densityData[index] = density;
 
 }
