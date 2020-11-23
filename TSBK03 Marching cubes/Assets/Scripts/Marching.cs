@@ -12,15 +12,14 @@ public class Marching : MonoBehaviour
 
 	List<Vector3> vertices = new List<Vector3>();
 	List<int> triangles = new List<int>();
-	float[,,] terrainMap;
 	private float[] densityArray;
 
 	//int width = 32;
 	//int height = 32;
 
-	const int chunkSize = 32;
-	const int numPointsPerAxis = chunkSize + 1;
-	const int numPoints = numPointsPerAxis * numPointsPerAxis * numPointsPerAxis;
+	public int chunkSize = 16;
+	int numPointsPerAxis;
+	int numPoints;
 
 	const int threadGroupSize = 8;
 	int kernel;
@@ -40,7 +39,6 @@ public class Marching : MonoBehaviour
 		kernel = shader.FindKernel("CSMain");
 
 		// Buffer for the noise values in a chunk
-		
 
 		meshFilter = GetComponent<MeshFilter>();
 		
@@ -49,6 +47,9 @@ public class Marching : MonoBehaviour
 
 	private void Run()
     {
+		numPointsPerAxis = chunkSize + 1;
+		numPoints = numPointsPerAxis * numPointsPerAxis * numPointsPerAxis;
+
 		pointsBuffer = new ComputeBuffer(numPoints, sizeof(float));
 
 		shader.SetBuffer(kernel, "densityData", pointsBuffer);
@@ -57,7 +58,7 @@ public class Marching : MonoBehaviour
 		shader.SetFloat("Amplitude", Amplitude);
 		shader.SetFloat("Frequency", Frequency);
 
-		shader.Dispatch(kernel, chunkSize / threadGroupSize, chunkSize / threadGroupSize, chunkSize / threadGroupSize);
+		shader.Dispatch(kernel, numPointsPerAxis / threadGroupSize, numPointsPerAxis / threadGroupSize, numPointsPerAxis / threadGroupSize);
 
 		densityArray = new float[numPoints];
 		//Debug.Log(densityArray);
@@ -92,62 +93,26 @@ public class Marching : MonoBehaviour
 				for (int z = 0; z < chunkSize; z++)
 				{
 					float[] cube = new float[8];
-					for (int i = 0; i < 8; i++)
-					{
-						// Find corners of voxel
-						Vector3Int corner = new Vector3Int(x, y, z) + CornerTable[i];
+                    for (int i = 0; i < 8; i++)
+                    {
+                        // find corners of voxel
+                        Vector3Int corner = new Vector3Int(x, y, z) + CornerTable[i];
 
-						// Indexing of flattened 3D array, index = x + N * (y + N*z)
-						cube[i] = densityArray[corner.z * numPointsPerAxis * numPointsPerAxis + corner.y * numPointsPerAxis + corner.x];
+                        // indexing of flattened 3d array, index = x + n * (y + n*z)
+                        cube[i] = densityArray[corner.z * numPointsPerAxis * numPointsPerAxis + corner.y * numPointsPerAxis + corner.x];
+
+                    }
+
+                    if (x == 31 && y == 31 && z == 31)
+                    {
+						Debug.Log(densityArray[31 * numPointsPerAxis * numPointsPerAxis + 31 * numPointsPerAxis + 32]); //x
+						Debug.Log(densityArray[31 * numPointsPerAxis * numPointsPerAxis + 32 * numPointsPerAxis + 31]); //y
+						Debug.Log(densityArray[32 * numPointsPerAxis * numPointsPerAxis + 31 * numPointsPerAxis + 31]); //z
 						
+						Debug.Log(densityArray[32 * numPointsPerAxis * numPointsPerAxis + 32 * numPointsPerAxis + 32]); //xyz
 					}
 
 					MarchCube(new Vector3(x, y, z), cube);
-				}
-			}
-		}
-	}
-
-	void generateTerrain()
-	{
-		float density;
-		float freq;
-		float amp;
-		float maxVal = 0;
-		for (int x = 0; x < chunkSize + 1; x++)
-		{
-			for (int y = 0; y < chunkSize + 1; y++)
-			{
-				for (int z = 0; z < chunkSize + 1; z++)
-				{
-					density = -y;
-					amp = Amplitude;
-					freq = Frequency;
-					// Octaves
-					for (int i = 0; i < Octaves; i++)
-					{
-						density += Mathf.Pow(1.0f - Mathf.Abs(Unity.Mathematics.noise.snoise(float3(x, y, z) * Frequency)),2) * Amplitude;
-						amp *= 2.0f;
-						freq *= 0.5f;
-					}
-
-					terrainMap[x, y, z] = density;
-
-					if (terrainMap[x, y, z] > maxVal)
-						maxVal = terrainMap[x, y, z];
-
-
-				}
-			}
-		}
-
-		for (int x = 0; x < chunkSize + 1; x++)
-		{
-			for (int y = 0; y < chunkSize + 1; y++)
-			{
-				for (int z = 0; z < chunkSize + 1; z++)
-				{
-					terrainMap[x, y, z] = terrainMap[x, y, z] / maxVal;
 				}
 			}
 		}
