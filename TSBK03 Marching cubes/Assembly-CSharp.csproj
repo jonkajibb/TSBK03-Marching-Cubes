@@ -57,6 +57,8 @@
   <ItemGroup>
      <Compile Include="Assets\Scripts\Marching.cs" />
      <None Include="Assets\Scripts\Compute Shaders\Density.compute" />
+     <None Include="Assets\Scripts\Compute Shaders\MarchingCubes.compute" />
+     <None Include="Assets\Scripts\Compute Shaders\Tables.compute" />
      <None Include="Assets\Scripts\Compute Shaders\Noise.compute" />
  <Reference Include="UnityEngine">
  <HintPath>D:/Program Files/2019.4.13f1/Editor/Data/Managed/UnityEngine/UnityEngine.dll</HintPath>

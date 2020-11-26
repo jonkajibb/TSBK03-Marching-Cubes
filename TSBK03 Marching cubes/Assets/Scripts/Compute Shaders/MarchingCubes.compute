@@ -1,0 +1,104 @@
+﻿// Includes
+#include "Tables.compute"
+
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel MarchingCubes
+
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+RWStructuredBuffer<float> Density;
+AppendStructuredBuffer<float3> Vertices;
+AppendStructuredBuffer<int> Triangles;
+
+// voxel data
+int chunkSize;
+//int numPointsPerAxis;
+
+// noise params
+//int Octaves;
+//float Amplitude;
+//float Frequency;
+
+int indexFromCoord(int x, int y, int z, int w) {
+	return z * w * w + y * w + x;
+	//return x + y * w + z * w * w;
+}
+
+[numthreads(8,8,8)]
+void MarchingCubes (uint3 id : SV_DispatchThreadID)
+{
+	// Cube, 8 corners
+	float cube[8];
+
+	float3 pos = id.xyz;
+	int vertexBufferSize = 0;
+	
+	// Indexing of flattened 3D array, index = x + N * (y + N*z)
+	cube[0] = Density[indexFromCoord(id.x, id.y, id.z, chunkSize)];
+	cube[1] = Density[indexFromCoord(id.x + 1, id.y, id.z, chunkSize)];
+	cube[2] = Density[indexFromCoord(id.x + 1, id.y + 1, id.z, chunkSize)];
+	cube[3] = Density[indexFromCoord(id.x, id.y + 1, id.z, chunkSize)];
+	cube[4] = Density[indexFromCoord(id.x, id.y, id.z + 1, chunkSize)];
+	cube[5] = Density[indexFromCoord(id.x + 1, id.y, id.z, chunkSize)];
+	cube[6] = Density[indexFromCoord(id.x + 1, id.y + 1, id.z + 1, chunkSize)];
+	cube[7] = Density[indexFromCoord(id.x, id.y + 1, id.z + 1, chunkSize)];
+	/*
+	int cubeIndex = 0;
+
+	//Find which corners / vertices are inside or outside the surface
+
+	for (int v = 0; v < 8; v++)
+	{
+		if (cube[v] < 0)
+			// Shifts 1 to left by 'v' bits. v=3 -> 0000 1000 = 8
+			cubeIndex |= 1 << v;
+	}
+
+
+	// If the configuration of this cube is 0 or 255 (completely inside the terrain or completely outside of it) we don't need to do anything.
+	if (cubeIndex == 0 || cubeIndex == 255)
+		return;
+
+	// Find which edges are intersected by the surface
+	//edgeIndex = edgeTable[flagIndex]; // returns 12 bit number
+	*/
+	// Find right set of triangles. Super advanced loop
+	for (int i = 0; i < 16; i += 3)
+	{
+		/*
+		if (TriangleTable[cubeIndex][i] == -1)
+		{
+			return;
+		}
+		
+		float3 vert0a = pos + EdgeTable[TriangleTable[cubeIndex][i]][0];
+		float3 vert0b = pos + EdgeTable[TriangleTable[cubeIndex][i]][1];
+
+		float3 vert1a = pos + EdgeTable[TriangleTable[cubeIndex][i + 1]][0];
+		float3 vert1b = pos + EdgeTable[TriangleTable[cubeIndex][i + 1]][1];
+
+		float3 vert2a = pos + EdgeTable[TriangleTable[cubeIndex][i + 2]][ 0];
+		float3 vert2b = pos + EdgeTable[TriangleTable[cubeIndex][i + 2]][ 1];
+
+		// Create vertex in middle of each edge
+		float3 vert0 = (vert0a + vert0b) * 0.5f;
+		float3 vert1 = (vert1a + vert1b) * 0.5f;
+		float3 vert2 = (vert2a + vert2b) * 0.5f;
+
+
+		// Add vertices to vertex buffer, then add 
+		// their index to the triangles buffer in grps of 3.
+		Vertices.Append(vert0);
+		vertexBufferSize++;
+		Triangles.Append(vertexBufferSize - 1);
+		
+		Vertices.Append(vert1);
+		vertexBufferSize++;
+		Triangles.Append(vertexBufferSize - 1);
+		
+		Vertices.Append(vert2);
+		vertexBufferSize++;
+		Triangles.Append(vertexBufferSize - 1);
+		*/
+	}
+}
