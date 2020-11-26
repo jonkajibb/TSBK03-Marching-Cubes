@@ -103,15 +103,6 @@ public class Marching : MonoBehaviour
 
                     }
 
-                    if (x == 31 && y == 31 && z == 31)
-                    {
-						Debug.Log(densityArray[31 * numPointsPerAxis * numPointsPerAxis + 31 * numPointsPerAxis + 32]); //x
-						Debug.Log(densityArray[31 * numPointsPerAxis * numPointsPerAxis + 32 * numPointsPerAxis + 31]); //y
-						Debug.Log(densityArray[32 * numPointsPerAxis * numPointsPerAxis + 31 * numPointsPerAxis + 31]); //z
-						
-						Debug.Log(densityArray[32 * numPointsPerAxis * numPointsPerAxis + 32 * numPointsPerAxis + 32]); //xyz
-					}
-
 					MarchCube(new Vector3(x, y, z), cube);
 				}
 			}
@@ -120,13 +111,13 @@ public class Marching : MonoBehaviour
 	
     void BuildMesh()
 	{
-
 		Mesh mesh = new Mesh();
 		mesh.vertices = vertices.ToArray();
 		mesh.triangles = triangles.ToArray();
 		mesh.RecalculateNormals();
 		meshFilter.mesh = mesh;
 
+		Debug.Log(mesh.vertexCount);
 	}
 
 	void ClearMesh()

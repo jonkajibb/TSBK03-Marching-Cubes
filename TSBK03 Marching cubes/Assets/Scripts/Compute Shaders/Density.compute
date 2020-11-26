@@ -17,8 +17,6 @@ int Octaves;
 float Amplitude;
 float Frequency;
 
-int xOut, yOut, zOut;
-
 // problem: indexing only goes between 0 and 32
 // causes sides of chunk to be 0, creating walls
 int indexFromCoord(int x, int y, int z, int w) {
