@@ -388,6 +388,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49880f0534034f64b8b4a705431e4f98, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  chunkSize: 127
   _config: 1
   Frequency: 1
   Amplitude: 1

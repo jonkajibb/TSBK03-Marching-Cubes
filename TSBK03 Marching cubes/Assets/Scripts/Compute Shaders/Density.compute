@@ -17,8 +17,13 @@ int Octaves;
 float Amplitude;
 float Frequency;
 
+// problem: indexing only goes between 0 and 32
+// causes sides of chunk to be 0, creating walls
 int indexFromCoord(int x, int y, int z, int w) {
-    return z * w * w + y * w + x;
+	/*x += 1;
+	y += 1;
+	z += 1;*/
+	return z * w * w + y * w + x;
 	//return x + y * w + z * w * w;
 }
 
@@ -26,6 +31,11 @@ int indexFromCoord(int x, int y, int z, int w) {
 [numthreads(8,8,8)]
 void Density (uint3 id : SV_DispatchThreadID)
 {
+	if (id.x > numPointsPerAxis || id.y > numPointsPerAxis || id.z > numPointsPerAxis) {
+		//densityData[index] = 0;
+		return;
+	}
+
 	int index = indexFromCoord(id.x, id.y, id.z, numPointsPerAxis);
 
 	float3 coord = id.xyz;
@@ -33,15 +43,6 @@ void Density (uint3 id : SV_DispatchThreadID)
 	float amp = Amplitude;
 	float freq = Frequency;
 	float maxVal;
-
-	/*
-	if (id.x > numPointsPerAxis || id.y > numPointsPerAxis || id.z > numPointsPerAxis) {
-		//densityData[index] = 0;
-		return;
-	}*/
-
-    
-    //float[] terrainMap = new float[width + 1, height + 1, width + 1];
 
     //-----------------
 	//density = -id.y;
