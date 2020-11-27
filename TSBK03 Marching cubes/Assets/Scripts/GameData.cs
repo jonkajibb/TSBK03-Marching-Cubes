@@ -2,234 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-using static Unity.Mathematics.math;
-
-public class Marching : MonoBehaviour
-{
-	
-	bool isUpdated = false;
-	MeshFilter meshFilter;
-
-	List<Vector3> vertices = new List<Vector3>();
-	List<int> triangles = new List<int>();
-	private float[] densityArray;
-
-	//int width = 32;
-	//int height = 32;
-
-	public int chunkSize = 16;
-	int numPointsPerAxis;
-	int numPoints;
-
-	const int threadGroupSize = 8;
-	int kernel;
-
-	public int _config = -1;
-	public float Frequency = 1.0f;
-	public float Amplitude = 1.0f;
-	public int Octaves = 3;
-	
-	public ComputeShader shader;
-	private ComputeBuffer pointsBuffer; // Carries noise data
-
-	
-
-	private void Start()
-    {
-		kernel = shader.FindKernel("CSMain");
-
-		// Buffer for the noise values in a chunk
-
-		meshFilter = GetComponent<MeshFilter>();
-		
-		Run();
-	}
-
-	private void Run()
-    {
-		numPointsPerAxis = chunkSize + 1;
-		numPoints = numPointsPerAxis * numPointsPerAxis * numPointsPerAxis;
-
-		pointsBuffer = new ComputeBuffer(numPoints, sizeof(float));
-
-		shader.SetBuffer(kernel, "densityData", pointsBuffer);
-		shader.SetInt("numPointsPerAxis", numPointsPerAxis);
-		shader.SetInt("Octaves", Octaves);
-		shader.SetFloat("Amplitude", Amplitude);
-		shader.SetFloat("Frequency", Frequency);
-
-		shader.Dispatch(kernel, numPointsPerAxis / threadGroupSize, numPointsPerAxis / threadGroupSize, numPointsPerAxis / threadGroupSize);
-
-		densityArray = new float[numPoints];
-		//Debug.Log(densityArray);
-		pointsBuffer.GetData(densityArray);
-
-		ClearMesh();
-		//generateTerrain();
-		CreateMesh();
-		BuildMesh();
-
-		pointsBuffer.Release();
-
-		isUpdated = false;
-	}
-
-	private void Update()
-    {
-		if (isUpdated == true)
-		{
-			Run();
-		}
-	}
-
-	void CreateMesh()
-	{
-
-		// (x,y,z) is VOXEL POSITION
-		for (int x = 0; x < chunkSize; x++)
-		{
-			for (int y = 0; y < chunkSize; y++)
-			{
-				for (int z = 0; z < chunkSize; z++)
-				{
-					float[] cube = new float[8];
-                    for (int i = 0; i < 8; i++)
-                    {
-                        // find corners of voxel
-                        Vector3Int corner = new Vector3Int(x, y, z) + CornerTable[i];
-
-                        // indexing of flattened 3d array, index = x + n * (y + n*z)
-                        cube[i] = densityArray[corner.z * numPointsPerAxis * numPointsPerAxis + corner.y * numPointsPerAxis + corner.x];
-
-                    }
-
-					MarchCube(new Vector3(x, y, z), cube);
-				}
-			}
-		}
-	}
-	
-    void BuildMesh()
-	{
-		Mesh mesh = new Mesh();
-		mesh.vertices = vertices.ToArray();
-		mesh.triangles = triangles.ToArray();
-		mesh.RecalculateNormals();
-		meshFilter.mesh = mesh;
-
-		Debug.Log(mesh.vertexCount);
-	}
-
-	void ClearMesh()
-    {
-		vertices.Clear();
-		triangles.Clear();
-    }
-
-
-    void OnValidate()
-    {
-		isUpdated = true;
-	}
-
-	// Performs Marching cubes on a single cube
-	// input: positon and the cubes 8 vertices
-	void MarchCube(Vector3 position, float[] cube)
-	{
-		int cubeIndex = 0;
-
-        //Find which corners / vertices are inside or outside the surface
-
-        for (int v = 0; v < 8; v++)
-        {
-            if (cube[v] < 0)
-                // Shifts 1 to left by 'v' bits. v=3 -> 0000 1000 = 8
-                cubeIndex |= 1 << v;
-        }
-
-
-        // If the configuration of this cube is 0 or 255 (completely inside the terrain or completely outside of it) we don't need to do anything.
-        if (cubeIndex == 0 || cubeIndex == 255)
-			return;
-
-		// Find which edges are intersected by the surface
-		//edgeIndex = edgeTable[flagIndex]; // returns 12 bit number
-
-		// Find right set of triangles. Super advanced loop
-		for(int i = 0; i < 16; i += 3)
-        {
-			if(TriangleTable[cubeIndex, i] == -1)
-            {
-				return;
-            }
-
-			Vector3 vert0a = position + EdgeTable[ TriangleTable[cubeIndex, i], 0];
-			Vector3 vert0b = position + EdgeTable[ TriangleTable[cubeIndex, i], 1];
-
-			Vector3 vert1a = position + EdgeTable[ TriangleTable[cubeIndex, i+1], 0];
-			Vector3 vert1b = position + EdgeTable[ TriangleTable[cubeIndex, i+1], 1];
-
-			Vector3 vert2a = position + EdgeTable[ TriangleTable[cubeIndex, i+2], 0];
-			Vector3 vert2b = position + EdgeTable[ TriangleTable[cubeIndex, i+2], 1];
-
-			// Create vertex in middle of each edge
-			Vector3 vert0 = (vert0a + vert0b) * 0.5f;
-			Vector3 vert1 = (vert1a + vert1b) * 0.5f;
-			Vector3 vert2 = (vert2a + vert2b) * 0.5f;
-
-			vertices.Add(vert0);
-			triangles.Add(vertices.Count - 1);
-			vertices.Add(vert1);
-			triangles.Add(vertices.Count - 1);
-			vertices.Add(vert2);
-			triangles.Add(vertices.Count - 1);
-		}
-	}
-
-	void MarchSingleCube(Vector3 position, int index)
-	{
-		int cubeIndex = index;
-
-		// If the configuration of this cube is 0 or 255 (completely inside the terrain or completely outside of it) we don't need to do anything.
-		if (cubeIndex == 0 || cubeIndex == 255)
-			return;
-
-		// Find which edges are intersected by the surface
-		//edgeIndex = edgeTable[flagIndex]; // returns 12 bit number
-
-		// Find right set of triangles. Super advanced loop
-		for (int i = 0; i < 16; i += 3)
-		{
-			if (TriangleTable[cubeIndex, i] == -1)
-			{
-				return;
-			}
-
-			Vector3 vert0a = position + EdgeTable[TriangleTable[cubeIndex, i], 0];
-			Vector3 vert0b = position + EdgeTable[TriangleTable[cubeIndex, i], 1];
-
-			Vector3 vert1a = position + EdgeTable[TriangleTable[cubeIndex, i + 1], 0];
-			Vector3 vert1b = position + EdgeTable[TriangleTable[cubeIndex, i + 1], 1];
-
-			Vector3 vert2a = position + EdgeTable[TriangleTable[cubeIndex, i + 2], 0];
-			Vector3 vert2b = position + EdgeTable[TriangleTable[cubeIndex, i + 2], 1];
-
-			// Create vertex in middle of each edge
-			Vector3 vert0 = (vert0a + vert0b) * 0.5f;
-			Vector3 vert1 = (vert1a + vert1b) * 0.5f;
-			Vector3 vert2 = (vert2a + vert2b) * 0.5f;
-
-			vertices.Add(vert0);
-			triangles.Add(vertices.Count - 1);
-			vertices.Add(vert1);
-			triangles.Add(vertices.Count - 1);
-			vertices.Add(vert2);
-			triangles.Add(vertices.Count - 1);
-		}
-	}
-
-
-	Vector3Int[] CornerTable = new Vector3Int[8] {
+public static class GameData
+{	public static int chunkSize = 31;
+	public static Vector3Int[] CornerTable = new Vector3Int[8] {
 
 		new Vector3Int(0, 0, 0),
 		new Vector3Int(1, 0, 0),
@@ -242,7 +17,7 @@ public class Marching : MonoBehaviour
 
 	};
 
-	Vector3[,] EdgeTable = new Vector3[12, 2] {
+	public static Vector3[,] EdgeTable = new Vector3[12, 2] {
 
 		{ new Vector3(0.0f, 0.0f, 0.0f), new Vector3(1.0f, 0.0f, 0.0f) },
 		{ new Vector3(1.0f, 0.0f, 0.0f), new Vector3(1.0f, 1.0f, 0.0f) },
@@ -259,7 +34,7 @@ public class Marching : MonoBehaviour
 
 	};
 
-	private int[,] TriangleTable = new int[,] {
+	public static int[,] TriangleTable = new int[,] {
 
 		{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
 		{0, 8, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
@@ -519,5 +294,4 @@ public class Marching : MonoBehaviour
 		{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}
 
 	};
-
 }

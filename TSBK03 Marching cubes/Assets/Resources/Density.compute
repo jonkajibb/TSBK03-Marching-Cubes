@@ -42,13 +42,14 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 	int index = indexFromCoord(id.x, id.y, id.z, numPointsPerAxis);
 
 	float3 coord = id.xyz;
-	//float3 coord;
 	float density;
 	float amp = Amplitude;
 	float freq = Frequency;
 	float maxVal;
-
-	
+	//chunks
+	coord.x = (id.x + chunkPosX);
+	coord.y = (id.y + chunkPosY);
+	coord.z = (id.z + chunkPosZ);
     //-----------------
 	//density = -id.y;
 	
