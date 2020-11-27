@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public static class GameData
-{	public static int chunkSize = 31;
+{	public static int chunkSize = 15;
 	public static Vector3Int[] CornerTable = new Vector3Int[8] {
 
 		new Vector3Int(0, 0, 0),

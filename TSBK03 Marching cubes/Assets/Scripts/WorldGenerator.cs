@@ -15,13 +15,14 @@ public class WorldGenerator : MonoBehaviour
     void Generate(){
         for(int x = 0; x < Chunks; x++)
         { 
-          
+          for(int y = 0; y < Chunks; y++)
+                {
             for(int z = 0; z < Chunks; z++)
             {
-                Vector3Int chunkPos = new Vector3Int(x*GameData.chunkSize, 0, z*GameData.chunkSize);
+                Vector3Int chunkPos = new Vector3Int(x*GameData.chunkSize, y*GameData.chunkSize, z*GameData.chunkSize);
                 chunks.Add(chunkPos, new Chunk(chunkPos));
             }
-            
+            }
         }
 
     }

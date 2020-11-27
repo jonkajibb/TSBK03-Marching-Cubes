@@ -17,7 +17,7 @@ public class Chunk
 	//int width = 32;
 	//int height = 32;
 
-	public int chunkSize = 31;
+	public int chunkSize = 15;
 	int numPointsPerAxis;
 	int numPoints;
 
@@ -26,7 +26,7 @@ public class Chunk
 
 	public int _config = -1;
 	public float Frequency = 1f;
-	public float Amplitude = 10f;
+	public float Amplitude = 4f;
 	public int Octaves = 3;
 
 	public ComputeShader shader;
