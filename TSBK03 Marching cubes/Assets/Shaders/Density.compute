@@ -1,32 +1,71 @@
 ﻿// Each #kernel tells which function to compile; you can have many kernels
+// Each #kernel tells which function to compile; you can have many kernels
 #pragma kernel Density
 
 #include "Noise.compute"
 
-// Create a RenderTexture with enableRandomWrite flag and set it
-// with cs.SetTexture
+// Buffer to write to
+RWStructuredBuffer<float> densityData;
 
-//RWTexture3D<float> Result;
-RWStructuredBuffer<float> Result;
+// Variables set in C# script
 
-//float Tex3DRes;
+// voxel data
+int chunkSize;
+int numPointsPerAxis;
 
-int indexFromCoord(int x, int y, int z) {
-    return z * 64 * 64 + y * 64 + x;
+// noise params
+int Octaves;
+float Amplitude;
+float Frequency;
+
+// problem: indexing only goes between 0 and 32
+// causes sides of chunk to be 0, creating walls
+int indexFromCoord(int x, int y, int z, int w) {
+	/*x += 1;
+	y += 1;
+	z += 1;*/
+	return z * w * w + y * w + x;
+	//return x + y * w + z * w * w;
 }
 
 // 8*8*8 since 3D texture
-[numthreads(8,8,8)]
-void Density (uint3 id : SV_DispatchThreadID)
+[numthreads(8, 8, 8)]
+void Density(uint3 id : SV_DispatchThreadID)
 {
-    float density = 0;
+	if (id.x > numPointsPerAxis || id.y > numPointsPerAxis || id.z > numPointsPerAxis) {
+		//densityData[index] = 0;
+		return;
+	}
 
-    float3 ws = (float3)id.xyz; // / Tex3DRes;
+	int index = indexFromCoord(id.x, id.y, id.z, numPointsPerAxis);
 
-    density = -ws.y;
+	float3 coord = id.xyz;
+	float density;
+	float amp = Amplitude;
+	float freq = Frequency;
+	float maxVal;
 
-    density += snoise(ws);
+	//-----------------
+	//density = -id.y;
 
-    Result[indexFromCoord(id.x, id.y, id.z)] = density;
+	// Octaves
+
+	density = id.y;
+	density = -density;
+	density += (1.0 - snoise(coord / numPointsPerAxis * freq)) * amp;
+	/*for (int i = 0; i < Octaves; i++)
+	{
+		//density += 1.0f - snoise(id.xyz);
+		density += snoise(coord / 32 * freq) * amp;
+		amp *= 2.0f;
+		freq *= 0.5f;
+	}*/
+
+	/*
+	if (densityData[index] > maxVal)
+		maxVal = densityData[index];
+	*/
+	//-----------------
+	densityData[index] = density;
 
 }

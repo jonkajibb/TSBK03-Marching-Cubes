@@ -408,15 +408,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49880f0534034f64b8b4a705431e4f98, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-<<<<<<< Updated upstream
-  _config: 1
-  Scale: 64
-  Amplitude: 11.5
-=======
   chunkSize: 63
   _config: -1
   Frequency: 1
   Amplitude: 1
   Octaves: 3
   shader: {fileID: 7200000, guid: 63a9538a23c9b6a47b0cfc4618cdb388, type: 3}
->>>>>>> Stashed changes

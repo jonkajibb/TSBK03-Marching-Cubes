@@ -24,14 +24,6 @@ public class Marching : MonoBehaviour
 
 	private void Start()
     {
-<<<<<<< Updated upstream
-		terrainMap = new float[width + 1, height + 1, width + 1];
-=======
-		kernel = shader.FindKernel("Density");
-
-		// Buffer for the noise values in a chunk
-
->>>>>>> Stashed changes
 		meshFilter = GetComponent<MeshFilter>();
 		
 		Run();
@@ -129,11 +121,6 @@ public class Marching : MonoBehaviour
 		mesh.triangles = triangles.ToArray();
 		mesh.RecalculateNormals();
 		meshFilter.mesh = mesh;
-
-<<<<<<< Updated upstream
-=======
-		//Debug.Log(mesh.vertexCount);
->>>>>>> Stashed changes
 	}
 
 	void ClearMesh()

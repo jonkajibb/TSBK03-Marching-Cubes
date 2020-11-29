@@ -132,15 +132,6 @@ public class Chunk : MonoBehaviour
 		isUpdated = false;
 	}
 
-	// Update is called once per frame
-	//private void Update()
-	//{
-	//	if (isUpdated == true)
-	//	{
-	//		Run();
-	//	}
-	//}
-
 	void ClearMesh()
 	{
 		//vertices.;
