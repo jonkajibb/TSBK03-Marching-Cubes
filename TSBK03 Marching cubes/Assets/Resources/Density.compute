@@ -66,7 +66,7 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 
 	density += (1.0 - snoise(coord / numPointsPerAxis * 0.5 * freq)) * amp*2;
 	density += (1.0 - snoise(coord / numPointsPerAxis * 0.25 * freq)) * amp*4;
-	density += (1.0 - snoise(coord / numPointsPerAxis * 0.125 * freq)) * amp*8;
+	//density += (1.0 - snoise(coord / numPointsPerAxis * 0.125 * freq)) * amp*8;
 	//float3 warp = (1.0 - snoise(coord / numPointsPerAxis * 0.004));
 	//coord += warp * 8;
 	//density += (1.0 - snoise(coord / numPointsPerAxis * 0.65 * freq)) * amp * 16;

@@ -25,8 +25,8 @@ public class Chunk
 	int kernel;
 
 	public int _config = -1;
-	public float Frequency = 1f;
-	public float Amplitude = 4f;
+	public float Frequency = 0.5f;
+	public float Amplitude = 6f;
 	public int Octaves = 3;
 
 	public ComputeShader shader;
