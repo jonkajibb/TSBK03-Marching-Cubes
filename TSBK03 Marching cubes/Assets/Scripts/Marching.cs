@@ -29,7 +29,6 @@ public class Marching : MonoBehaviour
 
 	private void Start()
     {
-		terrainMap = new float[width + 1, height + 1, width + 1];
 		meshFilter = GetComponent<MeshFilter>();
 		meshCollider = GetComponent<MeshCollider>();
 		generateTerrain();
@@ -133,7 +132,6 @@ public class Marching : MonoBehaviour
 		mesh.RecalculateNormals();
 		meshFilter.mesh = mesh;
 		meshCollider.sharedMesh = meshFilter.sharedMesh;
-
 	}
 
 	void ClearMesh()

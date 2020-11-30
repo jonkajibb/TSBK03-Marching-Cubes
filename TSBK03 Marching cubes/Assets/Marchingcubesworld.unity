@@ -298,9 +298,9 @@ GameObject:
   m_Component:
   - component: {fileID: 2020668457}
   - component: {fileID: 2020668455}
+  - component: {fileID: 2020668456}
   - component: {fileID: 2020668458}
   - component: {fileID: 2020668459}
-  - component: {fileID: 2020668456}
   m_Layer: 0
   m_Name: GameObject
   m_TagString: Untagged
@@ -378,9 +378,28 @@ MonoBehaviour:
   m_GameObject: {fileID: 2020668454}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 49880f0534034f64b8b4a705431e4f98, type: 3}
+  m_Script: {fileID: 11500000, guid: 3a9e201e4118f2647848ce2f64b03c63, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  chunkSize: 31
+  _config: -1
+  Frequency: 1
+  Amplitude: 1
+  Octaves: 3
+  densityShader: {fileID: 7200000, guid: 63a9538a23c9b6a47b0cfc4618cdb388, type: 3}
+  marchShader: {fileID: 7200000, guid: b4fb260fe79a477408db3494b23f0743, type: 3}
+--- !u!114 &2020668459
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2020668454}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49880f0534034f64b8b4a705431e4f98, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier:
   _config: 1
   Frequency: 1.5
   Amplitude: 1.5
