@@ -56,7 +56,6 @@
   </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\Scripts\Chunk.cs" />
-     <Compile Include="Assets\Scripts\GameData.cs" />
      <Compile Include="Assets\Scripts\WorldGenerator.cs" />
      <None Include="Assets\Scripts\Compute Shaders\Density.compute" />
      <None Include="Assets\Resources\Density.compute" />

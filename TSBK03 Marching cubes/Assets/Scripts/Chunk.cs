@@ -17,7 +17,7 @@ public class Chunk
 	//int width = 32;
 	//int height = 32;
 
-	public int chunkSize = 15;
+	public static int chunkSize = 15;
 	int numPointsPerAxis;
 	int numPoints;
 
@@ -27,6 +27,8 @@ public class Chunk
 	public int _config = -1;
 	public float Frequency = 0.5f;
 	public float Amplitude = 6f;
+	
+	
 	public int Octaves = 3;
 
 	public ComputeShader shader;
@@ -40,6 +42,7 @@ public class Chunk
 
 	public Chunk(Vector3Int _position)
 	{
+		
 		chunkObject = new GameObject();
 		chunkPosition = _position;
 		chunkObject.transform.position = chunkPosition;
@@ -122,7 +125,7 @@ public class Chunk
                     for (int i = 0; i < 8; i++)
                     {
                         // find corners of voxel
-                        Vector3Int corner = new Vector3Int(x, y, z) + GameData.CornerTable[i];
+                        Vector3Int corner = new Vector3Int(x, y, z) + CornerTable[i];
 
                         // indexing of flattened 3d array, index = x + n * (y + n*z)
                         cube[i] = densityArray[corner.z * numPointsPerAxis * numPointsPerAxis + corner.y * numPointsPerAxis + corner.x];
@@ -184,19 +187,19 @@ public class Chunk
 		// Find right set of triangles. Super advanced loop
 		for(int i = 0; i < 16; i += 3)
         {
-			if(GameData.TriangleTable[cubeIndex, i] == -1)
+			if(TriangleTable[cubeIndex, i] == -1)
             {
 				return;
             }
 
-			Vector3 vert0a = position + GameData.EdgeTable[ GameData.TriangleTable[cubeIndex, i], 0];
-			Vector3 vert0b = position + GameData.EdgeTable[ GameData.TriangleTable[cubeIndex, i], 1];
+			Vector3 vert0a = position + EdgeTable[TriangleTable[cubeIndex, i], 0];
+			Vector3 vert0b = position + EdgeTable[TriangleTable[cubeIndex, i], 1];
 
-			Vector3 vert1a = position + GameData.EdgeTable[ GameData.TriangleTable[cubeIndex, i+1], 0];
-			Vector3 vert1b = position + GameData.EdgeTable[ GameData.TriangleTable[cubeIndex, i+1], 1];
+			Vector3 vert1a = position + EdgeTable[TriangleTable[cubeIndex, i+1], 0];
+			Vector3 vert1b = position + EdgeTable[TriangleTable[cubeIndex, i+1], 1];
 
-			Vector3 vert2a = position + GameData.EdgeTable[ GameData.TriangleTable[cubeIndex, i+2], 0];
-			Vector3 vert2b = position + GameData.EdgeTable[ GameData.TriangleTable[cubeIndex, i+2], 1];
+			Vector3 vert2a = position + EdgeTable[TriangleTable[cubeIndex, i+2], 0];
+			Vector3 vert2b = position + EdgeTable[TriangleTable[cubeIndex, i+2], 1];
 
 			// Create vertex in middle of each edge
 			Vector3 vert0 = (vert0a + vert0b) * 0.5f;
@@ -226,19 +229,19 @@ public class Chunk
 		// Find right set of triangles. Super advanced loop
 		for (int i = 0; i < 16; i += 3)
 		{
-			if (GameData.TriangleTable[cubeIndex, i] == -1)
+			if (TriangleTable[cubeIndex, i] == -1)
 			{
 				return;
 			}
 
-			Vector3 vert0a = position + GameData.EdgeTable[GameData.TriangleTable[cubeIndex, i], 0];
-			Vector3 vert0b = position + GameData.EdgeTable[GameData.TriangleTable[cubeIndex, i], 1];
+			Vector3 vert0a = position + EdgeTable[TriangleTable[cubeIndex, i], 0];
+			Vector3 vert0b = position + EdgeTable[TriangleTable[cubeIndex, i], 1];
 
-			Vector3 vert1a = position + GameData.EdgeTable[GameData.TriangleTable[cubeIndex, i + 1], 0];
-			Vector3 vert1b = position + GameData.EdgeTable[GameData.TriangleTable[cubeIndex, i + 1], 1];
+			Vector3 vert1a = position + EdgeTable[TriangleTable[cubeIndex, i + 1], 0];
+			Vector3 vert1b = position + EdgeTable[TriangleTable[cubeIndex, i + 1], 1];
 
-			Vector3 vert2a = position + GameData.EdgeTable[GameData.TriangleTable[cubeIndex, i + 2], 0];
-			Vector3 vert2b = position + GameData.EdgeTable[GameData.TriangleTable[cubeIndex, i + 2], 1];
+			Vector3 vert2a = position + EdgeTable[TriangleTable[cubeIndex, i + 2], 0];
+			Vector3 vert2b = position + EdgeTable[TriangleTable[cubeIndex, i + 2], 1];
 
 			// Create vertex in middle of each edge
 			Vector3 vert0 = (vert0a + vert0b) * 0.5f;
@@ -254,7 +257,7 @@ public class Chunk
 		}
 	}
 
-/*
+
 	Vector3Int[] CornerTable = new Vector3Int[8] {
 
 		new Vector3Int(0, 0, 0),
@@ -545,5 +548,5 @@ public class Chunk
 		{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}
 
 	};
-	*/
+	
 }

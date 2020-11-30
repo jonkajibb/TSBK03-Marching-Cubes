@@ -7,6 +7,8 @@ public class WorldGenerator : MonoBehaviour
     // Start is called before the first frame update
     public int Chunks = 10;
     Dictionary<Vector3Int, Chunk> chunks = new Dictionary<Vector3Int, Chunk>();
+  
+
     void Start()
     {
         Generate();
@@ -19,8 +21,9 @@ public class WorldGenerator : MonoBehaviour
                 {
             for(int z = 0; z < Chunks; z++)
             {
-                Vector3Int chunkPos = new Vector3Int(x*GameData.chunkSize, y*GameData.chunkSize, z*GameData.chunkSize);
+                Vector3Int chunkPos = new Vector3Int(x*Chunk.chunkSize, y*Chunk.chunkSize, z*Chunk.chunkSize);
                 chunks.Add(chunkPos, new Chunk(chunkPos));
+
             }
             }
         }
