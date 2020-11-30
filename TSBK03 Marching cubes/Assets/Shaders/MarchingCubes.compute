@@ -33,6 +33,16 @@ void FillCube(float x, float y, float z, out float cube[8]) {
 	}
 }
 
+float3 linearInterpolation(float3 v1, float3 v2, float val1, float val2) {
+
+	float isoValue = 0;
+	float3 outVertex;
+
+	outVertex = v1 + ((isoValue - val1) * ((v2 - v1) / (val2 - val1)));
+	
+	return outVertex;
+}
+
 [numthreads(8,8,8)]
 void MarchingCubes (uint3 id : SV_DispatchThreadID)
 {
@@ -66,22 +76,34 @@ void MarchingCubes (uint3 id : SV_DispatchThreadID)
 	// Find right set of triangles. Super advanced loop
 	for (int i = 0; triangleTable[cubeIndex][i] != -1; i += 3)
 	{	
-		float3 vert0a = pos + cornerTable[edgeConnection[triangleTable[cubeIndex][i]].x];
-		float3 vert0b = pos + cornerTable[edgeConnection[triangleTable[cubeIndex][i]].y];
+		int edge0a = edgeConnection[triangleTable[cubeIndex][i]].x;
+		int edge0b = edgeConnection[triangleTable[cubeIndex][i]].y;
+		int edge1a = edgeConnection[triangleTable[cubeIndex][i + 1]].x;
+		int edge1b = edgeConnection[triangleTable[cubeIndex][i + 1]].y;
+		int edge2a = edgeConnection[triangleTable[cubeIndex][i + 2]].x;
+		int edge2b = edgeConnection[triangleTable[cubeIndex][i + 2]].y;
 
-		float3 vert1a = pos + cornerTable[edgeConnection[triangleTable[cubeIndex][i + 1]].x];
-		float3 vert1b = pos + cornerTable[edgeConnection[triangleTable[cubeIndex][i + 1]].y];
+		float3 vert0a = pos + cornerTable[edge0a];
+		float3 vert0b = pos + cornerTable[edge0b];
 
-		float3 vert2a = pos + cornerTable[edgeConnection[triangleTable[cubeIndex][i + 2]].x];
-		float3 vert2b = pos + cornerTable[edgeConnection[triangleTable[cubeIndex][i + 2]].y];
+		float3 vert1a = pos + cornerTable[edge1a];
+		float3 vert1b = pos + cornerTable[edge1b];
+
+		float3 vert2a = pos + cornerTable[edge2a];
+		float3 vert2b = pos + cornerTable[edge2b];
 
 		// Create vertex in middle of each edge
-		float3 vert0 = (vert0a + vert0b) * 0.5f;
+		/*float3 vert0 = (vert0a + vert0b) * 0.5f;
 		float3 vert1 = (vert1a + vert1b) * 0.5f;
-		float3 vert2 = (vert2a + vert2b) * 0.5f;
+		float3 vert2 = (vert2a + vert2b) * 0.5f;*/
 
-		// Add vertices to vertex buffer, then add 
-		// their index to the triangles buffer in grps of 3.
+		// Vertices with linear interpolation
+		float3 vert0 = linearInterpolation(vert0a, vert0b, cube[edge0a], cube[edge0b]);
+		float3 vert1 = linearInterpolation(vert1a, vert1b, cube[edge1a], cube[edge1b]);
+		float3 vert2 = linearInterpolation(vert2a, vert2b, cube[edge2a], cube[edge2b]);
+
+		// Append one struct containing the new vertices
+		// Several appends in one thread run causes problems
 		Triangle tri;
 		tri.vertex0 = vert0;
 		tri.vertex1 = vert1;
