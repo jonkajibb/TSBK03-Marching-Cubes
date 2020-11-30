@@ -185,6 +185,7 @@ public class WorldGenerator : MonoBehaviour
 			Run(i.Key);
 			Mesh mesh = BuildMesh();
 			i.Value.meshFilter.mesh = mesh;
+			i.Value.meshCollider.sharedMesh = i.Value.meshFilter.sharedMesh;
 		}
 	}
 

@@ -6,7 +6,7 @@ public class Chunk
 {
 	GameObject chunkObject;
 	MeshRenderer meshRenderer;
-	MeshCollider meshCollider;
+	public MeshCollider meshCollider;
 	public MeshFilter meshFilter;
 	Vector3Int chunkPosition;
 
