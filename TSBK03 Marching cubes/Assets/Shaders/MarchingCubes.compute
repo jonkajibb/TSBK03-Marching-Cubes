@@ -10,8 +10,6 @@ struct Triangle {
 	float3 vertex2;
 };
 
-// Create a RenderTexture with enableRandomWrite flag and set it
-// with cs.SetTexture
 RWStructuredBuffer<float> densityData;
 AppendStructuredBuffer<Triangle> triangleBuffer;
 
@@ -65,14 +63,10 @@ void MarchingCubes (uint3 id : SV_DispatchThreadID)
 			cubeIndex |= 1 << v;
 	}
 
-
 	// If the configuration of this cube is 0 or 255 (completely inside the terrain or completely outside of it) we don't need to do anything.
 	if (cubeIndex == 0 || cubeIndex == 255)
 		return;
 
-	// Find which edges are intersected by the surface
-	//edgeIndex = edgeTable[flagIndex]; // returns 12 bit number
-	
 	// Find right set of triangles. Super advanced loop
 	for (int i = 0; triangleTable[cubeIndex][i] != -1; i += 3)
 	{	

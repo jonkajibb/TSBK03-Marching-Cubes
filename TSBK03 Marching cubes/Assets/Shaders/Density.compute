@@ -21,11 +21,7 @@ float Frequency;
 // problem: indexing only goes between 0 and 32
 // causes sides of chunk to be 0, creating walls
 int indexFromCoord(int x, int y, int z, int w) {
-	/*x += 1;
-	y += 1;
-	z += 1;*/
 	return z * w * w + y * w + x;
-	//return x + y * w + z * w * w;
 }
 
 // 8*8*8 since 3D texture

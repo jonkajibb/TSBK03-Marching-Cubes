@@ -42,10 +42,6 @@ public class Chunk : MonoBehaviour
 
 	private void Start()
 	{
-		//kernel = shader.FindKernel("CSMain");
-
-		// Buffer for the noise values in a chunk
-
 		meshFilter = GetComponent<MeshFilter>();
 
 		Run();
@@ -53,6 +49,7 @@ public class Chunk : MonoBehaviour
 
 	private void Run()
 	{
+		// Define number of points and voxels inside one chunk
 		numPointsPerAxis = chunkSize + 1; 
 		numPoints = numPointsPerAxis * numPointsPerAxis * numPointsPerAxis;
 		numVoxels = chunkSize * chunkSize * chunkSize;
@@ -105,13 +102,6 @@ public class Chunk : MonoBehaviour
 
 		for (int i = 0; i < numTris; i++)
 		{
-			//for (int j = 0; j < 3; j++)
-			//{
-			//	triangles[i * 3 + j] = i * 3 + j;
-			//	vertices[i * 3 + 0] = tris[i].vertex0;
-			//	vertices[i * 3 + 1] = tris[i].vertex1;
-			//	vertices[i * 3 + 2] = tris[i].vertex2;
-			//}
 			triangles[i * 3 + 0] = i * 3 + 0;
 			triangles[i * 3 + 1] = i * 3 + 1;
 			triangles[i * 3 + 2] = i * 3 + 2;
@@ -130,12 +120,6 @@ public class Chunk : MonoBehaviour
 		triCountBuffer.Release();
 
 		isUpdated = false;
-	}
-
-	void ClearMesh()
-	{
-		//vertices.;
-		//triangles.Clear();
 	}
 
 	void OnValidate()
