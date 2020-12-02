@@ -9,6 +9,7 @@ public class Marching : MonoBehaviour
 	
 	bool isUpdated = false;
 	MeshFilter meshFilter;
+	MeshCollider meshCollider;
 
 	List<Vector3> vertices = new List<Vector3>();
 	List<int> triangles = new List<int>();
@@ -16,16 +17,21 @@ public class Marching : MonoBehaviour
 
 	int width = 32;
 	int height = 32;
+	//float scale = 16;
 
 	public int _config = -1;
 	public float Frequency = 1.0f;
 	public float Amplitude = 1.0f;
 	public int Octaves = 3;
 
+	public System.DateTime startTime;
+	
+
 	private void Start()
     {
 		meshFilter = GetComponent<MeshFilter>();
-		
+		meshCollider = GetComponent<MeshCollider>();
+		generateTerrain();
 		Run();
 		Debug.Log("space pressed");
 	}
@@ -33,8 +39,12 @@ public class Marching : MonoBehaviour
 	private void Run()
     {
 		ClearMesh();
+		
 		generateTerrain(); // Generates terrain with noise
+		
+		startTime = System.DateTime.UtcNow;
 		CreateMesh(); // Marching cubes is called here
+		Debug.Log((System.DateTime.UtcNow - startTime).TotalMilliseconds.ToString());
 		BuildMesh(); // Build mesh using triangle and vertex array
 		isUpdated = false;
 	}
@@ -86,7 +96,7 @@ public class Marching : MonoBehaviour
 					// Octaves
 					for (int i = 0; i < Octaves; i++)
 					{
-						density += Mathf.Pow(1.0f - Mathf.Abs(Unity.Mathematics.noise.snoise(float3(x, y, z) * Frequency)),2) * Amplitude;
+						density += Mathf.Pow(1.0f - Mathf.Abs(Unity.Mathematics.noise.snoise(float3(x, y, z)/width * Frequency)),2) * Amplitude;
 						amp *= 2.0f;
 						freq *= 0.5f;
 					}
@@ -121,6 +131,7 @@ public class Marching : MonoBehaviour
 		mesh.triangles = triangles.ToArray();
 		mesh.RecalculateNormals();
 		meshFilter.mesh = mesh;
+		meshCollider.sharedMesh = meshFilter.sharedMesh;
 	}
 
 	void ClearMesh()
