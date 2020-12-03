@@ -4,8 +4,9 @@ using UnityEngine;
 
 public class WorldGenerator : MonoBehaviour
 {
-	public int Chunks = 10;
-	Dictionary<Vector3Int, Chunk> chunkDict = new Dictionary<Vector3Int, Chunk>();
+	public int chunks_xz = 10;
+	public int chunks_y = 10;
+ 	Dictionary<Vector3Int, Chunk> chunkDict = new Dictionary<Vector3Int, Chunk>();
 
 	bool isUpdated = false;
 	//MeshFilter meshFilter;
@@ -16,7 +17,7 @@ public class WorldGenerator : MonoBehaviour
 	private Vector3[] vertices;
 	private int[] triangles;
 
-	int chunkSize = 15;
+	int chunkSize = 31;
 	int numVoxels;
 	int numPointsPerAxis;
 	int numPoints;
@@ -164,11 +165,11 @@ public class WorldGenerator : MonoBehaviour
 
 	void GenerateChunks()
 	{
-		for (int x = 0; x < Chunks; x++)
+		for (int x = 0; x < chunks_xz; x++)
 		{
-			for (int y = 0; y < Chunks; y++)
+			for (int y = 0; y < chunks_y; y++)
 			{
-				for (int z = 0; z < Chunks; z++)
+				for (int z = 0; z < chunks_xz; z++)
 				{
 					Vector3Int chunkPos = new Vector3Int(x * chunkSize, y * chunkSize, z * chunkSize);
 					chunkDict.Add(chunkPos, new Chunk(chunkPos));

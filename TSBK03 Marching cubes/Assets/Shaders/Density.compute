@@ -48,20 +48,20 @@ void Density(uint3 id : SV_DispatchThreadID)
 	float freq = Frequency;
 	float maxVal;
 
-	//-----------------
-	//density = -id.y;
-
-	// Octaves
-
-	/*density = id.y + chunkPosY;
-	density = -density;
-	density += (1.0 - snoise(coord / numPointsPerAxis * freq)) * amp;*/
+	// Non working sphere :(
+	/*float rad = 50;
+	float len = length(coord - float3(0, -rad, 0));
+	density = rad - len;*/
+	//density = rad - length(coord – float3(0, -rad, 0));
 
 	density = id.y + chunkPosY;
 	density = -density;
 	//density += (1.0 - snoise(coord / numPointsPerAxis * freq)) * amp;
 
+	// Octaves
+
 	//test
+	
 	density += (1.0 - snoise(coord / numPointsPerAxis * 4.03 * freq)) * amp * 0.25;
 	density += (1.0 - snoise(coord / numPointsPerAxis * 1.96 * freq)) * amp * 0.50;
 	density += (1.0 - snoise(coord / numPointsPerAxis * 1.01 * freq)) * amp;
@@ -69,24 +69,12 @@ void Density(uint3 id : SV_DispatchThreadID)
 	density += (1.0 - snoise(coord / numPointsPerAxis * 0.5 * freq)) * amp * 2;
 	density += (1.0 - snoise(coord / numPointsPerAxis * 0.25 * freq)) * amp * 4;
 	//density += (1.0 - snoise(coord / numPointsPerAxis * 0.125 * freq)) * amp*8;
-	//float3 warp = (1.0 - snoise(coord / numPointsPerAxis * 0.004));
-	//coord += warp * 8;
-	//density += (1.0 - snoise(coord / numPointsPerAxis * 0.65 * freq)) * amp * 16;
+	float3 warp = (1.0 - snoise(coord / numPointsPerAxis * 0.004));
+	coord += warp * 8;
+	density += (1.0 - snoise(coord / numPointsPerAxis * 0.125 * freq)) * amp * 8;
 
-	//density += (1.0 - snoise(coord / numPointsPerAxis * 0.3 * freq)) * amp * 32;
-	/*for (int i = 0; i < Octaves; i++)
-	{
-		//density += 1.0f - snoise(id.xyz);
-		density += snoise(coord / 32 * freq) * amp;
-		amp *= 2.0f;
-		freq *= 0.5f;
-	}*/
+	
 
-	/*
-	if (densityData[index] > maxVal)
-		maxVal = densityData[index];
-	*/
-	//-----------------
 	densityData[index] = density;
 
 }
