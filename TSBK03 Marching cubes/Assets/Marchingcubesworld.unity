@@ -381,8 +381,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a9e201e4118f2647848ce2f64b03c63, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  chunks_xz: 10
-  chunks_y: 10
+  chunks_xz: 1
+  chunks_y: 1
   _config: -1
   Frequency: 1
   Amplitude: 1
