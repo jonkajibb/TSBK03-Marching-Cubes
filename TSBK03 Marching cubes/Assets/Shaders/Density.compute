@@ -48,15 +48,17 @@ void Density(uint3 id : SV_DispatchThreadID)
 	float freq = Frequency;
 	float maxVal;
 
-	// Non working sphere :(
-	/*float rad = 50;
-	float len = length(coord - float3(0, -rad, 0));
+	//  Sphere code
+	/*float rad = 30;
+	float center = numPointsPerAxis * (chunkSize / 2);
+	float len = length(coord - (float3(0, -rad, 0) + float3(center,center,center)));
 	density = rad - len;*/
 	//density = rad - length(coord – float3(0, -rad, 0));
 
+	// Flat world code
 	density = id.y + chunkPosY;
 	density = -density;
-	//density += (1.0 - snoise(coord / numPointsPerAxis * freq)) * amp;
+	density += (1.0 - snoise(coord / numPointsPerAxis * freq)) * amp;
 
 	// Octaves
 
