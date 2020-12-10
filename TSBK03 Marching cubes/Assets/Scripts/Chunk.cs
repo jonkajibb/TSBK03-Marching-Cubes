@@ -4,21 +4,25 @@ using UnityEngine;
 
 public class Chunk
 {
-	GameObject chunkObject;
+	public GameObject chunkObject;
 	MeshRenderer meshRenderer;
 	public MeshCollider meshCollider;
 	public MeshFilter meshFilter;
-	Vector3Int chunkPosition;
+	public Vector3Int chunkPosition;
+	const int size = 100000;
+	public float[] densityArray;
 
-	public Chunk(Vector3Int _position)
+	public Chunk(Vector3Int position)
 	{
 		chunkObject = new GameObject();
-		chunkPosition = _position;
+		chunkObject.name = string.Format("Chunk {0}, {1}, {2}", position.x, position.y, position.z);
+		chunkPosition = position;
 		chunkObject.transform.position = chunkPosition;
 
 		meshFilter = chunkObject.AddComponent<MeshFilter>();
 		meshCollider = chunkObject.AddComponent<MeshCollider>();
 		meshRenderer = chunkObject.AddComponent<MeshRenderer>();
 		meshRenderer.material = new Material(Shader.Find("Diffuse"));
+		densityArray = new float[size];
 	}
 }

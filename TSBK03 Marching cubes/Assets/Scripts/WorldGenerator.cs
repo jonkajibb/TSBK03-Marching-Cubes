@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Mathematics;
 
 public class WorldGenerator : MonoBehaviour
 {
@@ -13,7 +14,7 @@ public class WorldGenerator : MonoBehaviour
 
 	//List<Vector3> vertices = new List<Vector3>();
 	//List<int> triangles = new List<int>();
-	private float[] densityArray;
+	//private float[] densityArray;
 	private Vector3[] vertices;
 	private int[] triangles;
 
@@ -36,6 +37,7 @@ public class WorldGenerator : MonoBehaviour
 	private ComputeBuffer pointsBuffer; // Carries noise data
 	private ComputeBuffer triangleBuffer;
 	private ComputeBuffer triCountBuffer;
+	private ComputeBuffer pointsBufferMarch;
 
 	struct Triangle
     {
@@ -55,10 +57,17 @@ public class WorldGenerator : MonoBehaviour
 		UpdateChunks();
 		//Run();
 	}
-
-	private void Run(Vector3Int chunkPos)
+	/*private void GenerateTerrain(Vector3Int chunkPos)
 	{
-		numPointsPerAxis = chunkSize + 1; 
+		GenerateNoise(chunkPos);
+
+		MarchCubes();
+	}*/
+	private void GenerateNoise(Vector3Int chunkPos)
+	{
+		float[] densityArray;
+
+		numPointsPerAxis = chunkSize + 1;
 		numPoints = numPointsPerAxis * numPointsPerAxis * numPointsPerAxis;
 		numVoxels = chunkSize * chunkSize * chunkSize;
 
@@ -76,9 +85,22 @@ public class WorldGenerator : MonoBehaviour
 		densityShader.Dispatch(0, numPointsPerAxis / threadGroupSize, numPointsPerAxis / threadGroupSize, numPointsPerAxis / threadGroupSize);
 
 		densityArray = new float[numPoints];
-
 		pointsBuffer.GetData(densityArray);
-		Debug.Log(densityArray[0]);
+		//Debug.Log(densityArray[0]);
+		chunkDict[chunkPos].densityArray = densityArray;
+		/*foreach (float i in densityArray)
+		{
+			Debug.Log(i);
+		}*/
+		pointsBuffer.Release();
+
+	}
+	private void MarchCubes(float[] densityArray)
+	{
+		//Debug.Log(densityArray[0]);
+		//Debug.Log(densityArray.Length);
+		pointsBufferMarch = new ComputeBuffer(numPoints, sizeof(float));
+		pointsBufferMarch.SetData(densityArray);
 
 		// Number of triangles per voxel is 5 max -> total is numVoxels*5
 		triangleBuffer = new ComputeBuffer(numVoxels * 5, sizeof(float) * 3 * 3, ComputeBufferType.Append);
@@ -86,7 +108,7 @@ public class WorldGenerator : MonoBehaviour
 
 
 		triangleBuffer.SetCounterValue(0);
-		marchShader.SetBuffer(0, "densityData", pointsBuffer);
+		marchShader.SetBuffer(0, "densityData", pointsBufferMarch);
 		marchShader.SetBuffer(0, "triangleBuffer", triangleBuffer);
 		marchShader.SetInt("chunkSize", chunkSize);
 		marchShader.SetInt("numPointsPerAxis", numPointsPerAxis);
@@ -102,7 +124,7 @@ public class WorldGenerator : MonoBehaviour
 		int numTris = triCountArray[0];
 
 		//numVerts *= 3;
-		Debug.Log("Vertex count: " + numTris);
+		//Debug.Log("Vertex count: " + numTris);
 
 		vertices = new Vector3[numTris * 3];
 		Triangle[] tris = new Triangle[numTris];
@@ -132,17 +154,23 @@ public class WorldGenerator : MonoBehaviour
 		//generateTerrain();
 		//CreateMesh();
 		//BuildMesh();
-		
-		pointsBuffer.Release();
+
+		pointsBufferMarch.Release();
 		triangleBuffer.Release();
 		triCountBuffer.Release();
 
 		//isUpdated = false;
 	}
+	private void Run(Vector3Int chunkPos)
+	{
+		
+
+		
+	}
 
 	void ClearMesh()
 	{
-		//vertices.;
+		//vertices.Clear();
 		//triangles.Clear();
 	}
 
@@ -159,7 +187,7 @@ public class WorldGenerator : MonoBehaviour
 		mesh.RecalculateNormals();
 		//chunk.meshFilter.mesh = mesh;
 
-		Debug.Log(mesh.vertexCount);
+		//Debug.Log(mesh.vertexCount);
 		return mesh;
 	}
 
@@ -173,7 +201,8 @@ public class WorldGenerator : MonoBehaviour
 				{
 					Vector3Int chunkPos = new Vector3Int(x * chunkSize, y * chunkSize, z * chunkSize);
 					chunkDict.Add(chunkPos, new Chunk(chunkPos));
-
+					chunkDict[chunkPos].chunkObject.transform.SetParent(transform);
+					chunkDict[chunkPos].densityArray = new float[numPoints];
 				}
 			}
 		}
@@ -183,12 +212,106 @@ public class WorldGenerator : MonoBehaviour
 	{
 		foreach (KeyValuePair<Vector3Int, Chunk> i in chunkDict)
 		{
-			Run(i.Key);
+			GenerateNoise(i.Key);
+			MarchCubes(i.Value.densityArray);
 			Mesh mesh = BuildMesh();
 			i.Value.meshFilter.mesh = mesh;
 			i.Value.meshCollider.sharedMesh = i.Value.meshFilter.sharedMesh;
 		}
 	}
+	void UpdateChunk(Vector3Int chunkPos)
+	{
+		//Debug.Log(chunkDict[chunkPos].densityArray.Length);
+		MarchCubes(chunkDict[chunkPos].densityArray);
+		//Debug.Log(vertices.Length);
+		//Debug.Log(triangles.Length);
+		//chunkDict[chunkPos].meshFilter.mesh.vertices = vertices;
+		//hunkDict[chunkPos].meshFilter.mesh.triangles = triangles;
+		//chunkDict[chunkPos].meshFilter.mesh.RecalculateNormals();
+		Mesh mesh = BuildMesh();
+		chunkDict[chunkPos].meshFilter.mesh = mesh;
+		chunkDict[chunkPos].meshCollider.sharedMesh = chunkDict[chunkPos].meshFilter.sharedMesh;
+		//chunkDict[chunkPos].meshCollider.sharedMesh = chunkDict[chunkPos].meshFilter.sharedMesh;
+	}
+	public void EditTerrain(Vector3 pointHit, float radius, float newDensityVal)
+	{
+		//Debug.Log(pointHit);
+		
+		Vector3Int chunkPos = new Vector3Int((int)(pointHit.x/chunkSize)*chunkSize, (int)(pointHit.y / chunkSize) * chunkSize, (int)(pointHit.z / chunkSize)*chunkSize);
+		int rad = Mathf.FloorToInt(radius);
+		
+		//Debug.Log(chunkPos);
+		//GenerateNoise(chunkPos);
+		
+		
+		for (int x = 0; x <= rad; x++)
+		{
+			for (int y = 0; y <= rad; y++)
+			{
+			for (int z = 0; z <= rad; z++)
+				{
+					
+					//Vector3Int newChunkPos = new Vector3Int(x+chunkPos.x * chunkSize, y+chunkPos.y * chunkSize, z+chunkPos.z * chunkSize); //*chunkSize??
+					
+					if (chunkDict.TryGetValue(chunkPos, out Chunk chunk))
+					{
+						Vector3Int v3Int = new Vector3Int(Mathf.CeilToInt(pointHit.x), Mathf.CeilToInt(pointHit.y), Mathf.CeilToInt(pointHit.z));
+						v3Int -= new Vector3Int(chunkPos.x+x, chunkPos.y + y, chunkPos.z + z);
+						int index = indexFromCoord(v3Int.x, v3Int.y, v3Int.z, numPointsPerAxis);
+						//Debug.Log(newChunkPos);
+						//chunk.densityArray[index] = newDensityVal;
+						chunkDict[chunkPos].densityArray[index] = newDensityVal;
+						UpdateChunk(chunkPos);
+
+					}
+				}
+			}
+
+		}
+		/*for (int x = 0; x < numPointsPerAxis; x++)
+		{
+			for (int y = 0; y < numPointsPerAxis; y++)
+			{
+				for (int z = 0; z < numPointsPerAxis; z++)
+				{
+					int index = indexFromCoord(x, y, z, numPointsPerAxis);
+					densityArray[index] = -1.0f;
+					if(x > 25)
+					{
+						densityArray[index] = 1.0f;
+					}
 
 
+				}
+			}
+		}*/
+		
+
+
+	}
+	int indexFromCoord(int x, int y, int z, int w)
+	{
+		return z * w * w + y * w + x;
+	}
+	public Chunk GetChunkFromVector3(Vector3 pos)
+	{
+
+		int x = (int)pos.x;
+		int y = (int)pos.y;
+		int z = (int)pos.z;
+
+		return chunkDict[new Vector3Int(x, y, z)];
+
+	}
+	/*public void PlaceTerrain(Vector3 pos)
+	{
+
+		Vector3Int v3Int = new Vector3Int(Mathf.CeilToInt(pos.x), Mathf.CeilToInt(pos.y), Mathf.CeilToInt(pos.z));
+		Vector3Int chunkPos = new Vector3Int((int)(pos.x / chunkSize) * chunkSize, (int)(pos.y / chunkSize) * chunkSize, (int)(pos.z / chunkSize) * chunkSize);
+		v3Int -= chunkPos;
+		int index = indexFromCoord(v3Int.x, v3Int.y, v3Int.z, numPointsPerAxis);
+		densityArray[index] = 0f;
+		UpdateChunk(chunkPos);
+
+	}*/
 }
