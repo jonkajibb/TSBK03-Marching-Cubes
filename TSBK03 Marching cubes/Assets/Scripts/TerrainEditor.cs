@@ -20,7 +20,7 @@ public class TerrainEditor : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(Input.GetMouseButtonDown(0))
+        if(Input.GetMouseButton(0))
         {
             var ray = new Ray(camera.transform.position, camera.transform.forward);
             RaycastHit hit;
@@ -30,7 +30,7 @@ public class TerrainEditor : MonoBehaviour
                 world.EditTerrain(hit.point, editRadius, 1.0f);
             }
         }
-        else if (Input.GetMouseButtonDown(1))
+        else if (Input.GetMouseButton(1))
         {
             var ray = new Ray(camera.transform.position, camera.transform.forward);
             RaycastHit hit;

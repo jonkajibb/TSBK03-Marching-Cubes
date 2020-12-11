@@ -328,7 +328,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 974bad379c62a2b4f8fc785f7a70cd90, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  editRadius: 3
+  editRadius: 1
   world: {fileID: 0}
 --- !u!1 &2020668454
 GameObject:
@@ -423,8 +423,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a9e201e4118f2647848ce2f64b03c63, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  chunks_xz: 10
-  chunks_y: 10
+  chunks_xz: 20
+  chunks_y: 20
   _config: -1
   Frequency: 2
   Amplitude: 5
