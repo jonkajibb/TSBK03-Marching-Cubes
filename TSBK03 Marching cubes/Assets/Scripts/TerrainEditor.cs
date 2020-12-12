@@ -12,7 +12,7 @@ public class TerrainEditor : MonoBehaviour
     void Start()
     {
         camera = Camera.main;
-        world = GameObject.Find("GameObject").GetComponent<WorldGenerator>();
+        world = GameObject.Find("Mesh Parent").GetComponent<WorldGenerator>();
         //gameobject.transform.Find("ChildName");
 
     }

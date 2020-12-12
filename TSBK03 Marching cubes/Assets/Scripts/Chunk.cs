@@ -5,12 +5,15 @@ using UnityEngine;
 public class Chunk
 {
 	public GameObject chunkObject;
-	MeshRenderer meshRenderer;
+	public MeshRenderer meshRenderer;
 	public MeshCollider meshCollider;
 	public MeshFilter meshFilter;
 	public Vector3Int chunkPosition;
+	//public Material material;
 	const int size = 100000;
 	public float[] densityArray;
+
+	Material triplanarMat;
 
 	public Chunk(Vector3Int position)
 	{
@@ -22,7 +25,10 @@ public class Chunk
 		meshFilter = chunkObject.AddComponent<MeshFilter>();
 		meshCollider = chunkObject.AddComponent<MeshCollider>();
 		meshRenderer = chunkObject.AddComponent<MeshRenderer>();
+
 		meshRenderer.material = new Material(Shader.Find("Diffuse"));
+		//meshRenderer.material = material;
+
 		densityArray = new float[size];
 	}
 }
