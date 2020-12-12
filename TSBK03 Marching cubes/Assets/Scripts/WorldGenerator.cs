@@ -224,6 +224,13 @@ public class WorldGenerator : MonoBehaviour
 	}
 	void UpdateChunk(Vector3Int chunkPos)
 	{
+		/*foreach (KeyValuePair<Vector3Int, Chunk> i in chunkDict)
+		{
+			MarchCubes(i.Value.densityArray);
+			Mesh mesh = BuildMesh();
+			i.Value.meshFilter.mesh = mesh;
+			i.Value.meshCollider.sharedMesh = i.Value.meshFilter.sharedMesh;
+		}*/
 		//Debug.Log(chunkDict[chunkPos].densityArray.Length);
 		MarchCubes(chunkDict[chunkPos].densityArray);
 		//Debug.Log(vertices.Length);
@@ -242,59 +249,44 @@ public class WorldGenerator : MonoBehaviour
 		
 		Vector3Int chunkPos = new Vector3Int((int)(pointHit.x/chunkSize)*chunkSize, (int)(pointHit.y / chunkSize) * chunkSize, (int)(pointHit.z / chunkSize)*chunkSize);
 		int rad = Mathf.FloorToInt(radius);
-		
+		Vector3Int pointHitInt = new Vector3Int(Mathf.CeilToInt(pointHit.x), Mathf.CeilToInt(pointHit.y), Mathf.CeilToInt(pointHit.z));
 		//Debug.Log(chunkPos);
 		//GenerateNoise(chunkPos);
-		
-		
-		for (int x = 0; x <= rad; x++)
+
+		for (int x = -rad; x <= rad; x++)
 		{
-			for (int y = 0; y <= rad; y++)
+			for (int y = -rad; y <= rad; y++)
 			{
-			for (int z = 0; z <= rad; z++)
+				for (int z = -rad; z <= rad; z++)
 				{
 					
 					//Vector3Int newChunkPos = new Vector3Int(x+chunkPos.x * chunkSize, y+chunkPos.y * chunkSize, z+chunkPos.z * chunkSize); //*chunkSize??
 					
 					if (chunkDict.TryGetValue(chunkPos, out Chunk chunk))
 					{
-						Vector3Int v3Int = new Vector3Int(Mathf.CeilToInt(pointHit.x), Mathf.CeilToInt(pointHit.y), Mathf.CeilToInt(pointHit.z));
-						v3Int -= new Vector3Int(chunkPos.x+x, chunkPos.y + y, chunkPos.z + z);
-						int index = indexFromCoord(v3Int.x, v3Int.y, v3Int.z, numPointsPerAxis);
+						Vector3Int worldCoord = pointHitInt;
+						worldCoord = worldCoord - new Vector3Int(chunkPos.x+x, chunkPos.y + y, chunkPos.z + z);
+						int index = indexFromCoord(worldCoord.x, worldCoord.y, worldCoord.z, numPointsPerAxis);
 						//Debug.Log(newChunkPos);
 						//chunk.densityArray[index] = newDensityVal;
-						chunkDict[chunkPos].densityArray[index] = newDensityVal;
-						UpdateChunk(chunkPos);
+						if(newDensityVal > 0)
+							chunkDict[chunkPos].densityArray[index] = Vector3Int.Distance(worldCoord, pointHitInt);
+						else
+							chunkDict[chunkPos].densityArray[index] = -Vector3Int.Distance(worldCoord, pointHitInt);
+
 
 					}
 				}
 			}
 
 		}
-		/*for (int x = 0; x < numPointsPerAxis; x++)
-		{
-			for (int y = 0; y < numPointsPerAxis; y++)
-			{
-				for (int z = 0; z < numPointsPerAxis; z++)
-				{
-					int index = indexFromCoord(x, y, z, numPointsPerAxis);
-					densityArray[index] = -1.0f;
-					if(x > 25)
-					{
-						densityArray[index] = 1.0f;
-					}
-
-
-				}
-			}
-		}*/
-		
-
-
+		UpdateChunk(chunkPos);
 	}
+
 	int indexFromCoord(int x, int y, int z, int w)
 	{
-		return z * w * w + y * w + x;
+		return x + w * (y + w * z);
+		//return z * w * w + y * w + x;
 	}
 	public Chunk GetChunkFromVector3(Vector3 pos)
 	{

@@ -18,7 +18,8 @@ int chunkSize;
 int numPointsPerAxis;
 
 int indexFromCoord(int x, int y, int z, int w) {
-	return z * w * w + y * w + x;
+	return x + w * (y + w * z);
+	//return z * w * w + y * w + x;
 }
 
 void FillCube(float x, float y, float z, out float cube[8]) {
