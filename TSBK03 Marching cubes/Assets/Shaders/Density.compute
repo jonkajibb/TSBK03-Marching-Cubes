@@ -60,6 +60,7 @@ void Density(uint3 id : SV_DispatchThreadID)
 	density = id.y + chunkPosY;
 	density = -density;
 	density += (1.0 - snoise(coord / numPointsPerAxis * freq)) * amp;
+	
 
 	// Octaves
 
@@ -69,12 +70,12 @@ void Density(uint3 id : SV_DispatchThreadID)
 	density += (1.0 - snoise(coord / numPointsPerAxis * 1.96 * freq)) * amp * 0.50;
 	density += (1.0 - snoise(coord / numPointsPerAxis * 1.01 * freq)) * amp;
 
-	density += (1.0 - snoise(coord / numPointsPerAxis * 0.5 * freq)) * amp * 2;
-	density += (1.0 - snoise(coord / numPointsPerAxis * 0.25 * freq)) * amp * 4;
+	density += (1.0 - snoise(coord / numPointsPerAxis * 0.5 * freq)) * amp * 2.0;
+	density += (1.0 - snoise(coord / numPointsPerAxis * 0.25 * freq)) * amp * 4.0;
 	//density += (1.0 - snoise(coord / numPointsPerAxis * 0.125 * freq)) * amp*8;
 	float3 warp = (1.0 - snoise(coord / numPointsPerAxis * 0.004));
 	coord += warp * 8;
-	density += (1.0 - snoise(coord / numPointsPerAxis * 0.125 * freq)) * amp * 8;
+	density += (1.0 - snoise(coord / numPointsPerAxis * 0.125 * freq)) * amp * 4.0;
 
 	
 

@@ -17,7 +17,7 @@
         Tags { "RenderType"="Opaque" "Queue" = "Geometry"}
         LOD 200
 
-        Pass
+        /*Pass
         {
             CGPROGRAM
             #pragma vertex vert
@@ -68,8 +68,8 @@
             return col;
         }
         ENDCG
-        }
-            /*
+        }*/
+            
         CGPROGRAM
         // Physically based Standard lighting model, and enable shadows on all light types
         #pragma surface surf Standard fullforwardshadows
@@ -111,7 +111,7 @@
         }
         
         ENDCG
-            */
+            
     }
     FallBack "Diffuse"
 }

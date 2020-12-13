@@ -23,7 +23,7 @@ RenderSettings:
   m_AmbientSkyColor: {r: 0.212, g: 0.227, b: 0.259, a: 1}
   m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
-  m_AmbientIntensity: 0.24
+  m_AmbientIntensity: 1
   m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
   m_SkyboxMaterial: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
@@ -52,7 +52,7 @@ LightmapSettings:
     m_AlbedoBoost: 1
     m_EnvironmentLightingMode: 0
     m_EnableBakedLightmaps: 1
-    m_EnableRealtimeLightmaps: 1
+    m_EnableRealtimeLightmaps: 0
   m_LightmapEditorSettings:
     serializedVersion: 12
     m_Resolution: 2
@@ -344,7 +344,7 @@ GameObject:
   - component: {fileID: 2020668458}
   - component: {fileID: 2020668459}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: Mesh Parent
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -368,7 +368,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10302, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 1577061a4ec3ab841a30245e7b428bfb, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -423,11 +423,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a9e201e4118f2647848ce2f64b03c63, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  chunks_xz: 20
-  chunks_y: 20
-  _config: -1
-  Frequency: 2
-  Amplitude: 5
+  chunks_xz: 5
+  chunks_y: 5
+  Frequency: 1.05
+  Amplitude: 7.35
   Octaves: 3
   densityShader: {fileID: 7200000, guid: 63a9538a23c9b6a47b0cfc4618cdb388, type: 3}
   marchShader: {fileID: 7200000, guid: b4fb260fe79a477408db3494b23f0743, type: 3}

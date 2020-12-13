@@ -129,12 +129,6 @@ public class WorldGenerator : MonoBehaviour
 		triangleBuffer.Release();
 		triCountBuffer.Release();
 	}
-	private void Run(Vector3Int chunkPos)
-	{
-		
-
-		
-	}
 
 	void OnValidate()
 	{
@@ -223,15 +217,5 @@ public class WorldGenerator : MonoBehaviour
 	{
 		return x + w * (y + w * z);
 		//return z * w * w + y * w + x;
-	}
-	public Chunk GetChunkFromVector3(Vector3 pos)
-	{
-
-		int x = (int)pos.x;
-		int y = (int)pos.y;
-		int z = (int)pos.z;
-
-		return chunkDict[new Vector3Int(x, y, z)];
-
 	}
 }
