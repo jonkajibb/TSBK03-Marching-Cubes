@@ -5,8 +5,6 @@ using Unity.Mathematics;
 
 public class WorldGenerator : MonoBehaviour
 {
-	public int chunks_xz = 10;
-	public int chunks_y = 10;
  	Dictionary<Vector3Int, Chunk> chunkDict = new Dictionary<Vector3Int, Chunk>();
 
 	private Vector3[] vertices;
@@ -19,11 +17,17 @@ public class WorldGenerator : MonoBehaviour
 
 	const int threadGroupSize = 8;
 
-	public int _config = -1;
+	[Header("Chunk settings")]
+	public int chunks_xz = 10;
+	public int chunks_y = 10;
+
+	[Header("Noise settings")]
+	//public int _config = -1;
 	public float Frequency = 1.0f;
 	public float Amplitude = 1.0f;
 	public int Octaves = 3;
 
+	[Header("Shader files")]
 	public ComputeShader densityShader;
 	public ComputeShader marchShader;
 
@@ -41,6 +45,7 @@ public class WorldGenerator : MonoBehaviour
 
 	private void Start()
 	{
+
 		GenerateChunks();
 		UpdateChunks();
 	}
@@ -157,10 +162,10 @@ public class WorldGenerator : MonoBehaviour
 					chunkDict.Add(chunkPos, new Chunk(chunkPos));
 					chunkDict[chunkPos].chunkObject.transform.SetParent(transform);
 					chunkDict[chunkPos].densityArray = new float[numPoints];
+					chunkDict[chunkPos].meshRenderer.material = GetComponent<Renderer>().material;
 				}
 			}
 		}
-
 	}
 	void UpdateChunks()
 	{
