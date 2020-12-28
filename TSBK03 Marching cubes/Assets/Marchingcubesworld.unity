@@ -344,7 +344,7 @@ GameObject:
   - component: {fileID: 2020668458}
   - component: {fileID: 2020668459}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: Mesh Parent
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -368,7 +368,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10302, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 1577061a4ec3ab841a30245e7b428bfb, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -423,11 +423,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a9e201e4118f2647848ce2f64b03c63, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  chunks_xz: 20
-  chunks_y: 20
-  _config: -1
+  chunks_xz: 5
+  chunks_y: 5
   Frequency: 2
-  Amplitude: 5
+  Amplitude: 2
   Octaves: 3
   densityShader: {fileID: 7200000, guid: 63a9538a23c9b6a47b0cfc4618cdb388, type: 3}
   marchShader: {fileID: 7200000, guid: b4fb260fe79a477408db3494b23f0743, type: 3}

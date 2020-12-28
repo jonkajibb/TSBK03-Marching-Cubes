@@ -10,45 +10,45 @@
         _MainTex("Main texture", 2D) = "white" {}
 
         _TextureScale("Texture Scale", float) = 1.0
-        _TriplanarBlendSharpness("Blend sharpness", float) = 1.0
+        _BlendSharpness("Blend sharpness", float) = 1.0
     }
     SubShader
     {
         Tags { "RenderType"="Opaque" "Queue" = "Geometry"}
         LOD 200
-
+        /*
         Pass
         {
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
-            // make fog work
-            #pragma multi_compile_fog
+            //#pragma surface surf Standard fullforwardshadows
 
             #include "UnityCG.cginc"
 
             struct appdata
             {
                 float4 vertex : POSITION;
-                float2 uv : TEXCOORD0;
+                float3 normal : NORMAL;
             };
 
             struct v2f
             {
-                float2 uv : TEXCOORD0;
-                UNITY_FOG_COORDS(1)
-                float4 vertex : SV_POSITION;
+                float4 position : SV_POSITION;
                 float3 worldPos : TEXCOORD0;
                 float3 normal : NORMAL;
             };
 
-            sampler2D _MainTex;
-            float4 _MainTex_ST;
+            sampler2D _TopTex;
+            sampler2D _SideTex;
+            float _BlendSharpness;
+            float _TextureScale;
 
             v2f vert(appdata v) {
                 v2f o;
+
                 //calculate the position in clip space to render the object
-                o.vertex = UnityObjectToClipPos(v.vertex);
+                o.position = UnityObjectToClipPos(v.vertex);
                 //calculate world position of vertex
                 float4 worldPos = mul(unity_ObjectToWorld, v.vertex);
                 o.worldPos = worldPos.xyz;
@@ -61,15 +61,29 @@
 
             fixed4 frag(v2f i) : SV_Target
             {
-                // sample the texture
-                fixed4 col = tex2D(_MainTex, i.uv);
-            // apply fog
-            UNITY_APPLY_FOG(i.fogCoord, col);
-            return col;
-        }
+                float2 xUV = i.worldPos.yz / _TextureScale;
+                float2 yUV = i.worldPos.xz / _TextureScale;
+                float2 zUV = i.worldPos.xy / _TextureScale;
+
+                fixed4 xDiffuse = tex2D(_SideTex, xUV);
+                fixed4 yDiffuse = tex2D(_TopTex, yUV);
+                fixed4 zDiffuse = tex2D(_SideTex, zUV);
+
+                // Weights from world normals
+                float3 blendWeights = pow(abs(i.normal), _BlendSharpness);
+                blendWeights = blendWeights / (blendWeights.x + blendWeights.y + blendWeights.z);
+
+                xDiffuse *= blendWeights.x;
+                yDiffuse *= blendWeights.y;
+                zDiffuse *= blendWeights.z;
+
+                fixed4 col = (xDiffuse + yDiffuse + zDiffuse);
+
+                return col;
+            }
         ENDCG
-        }
-            /*
+        }*/
+        
         CGPROGRAM
         // Physically based Standard lighting model, and enable shadows on all light types
         #pragma surface surf Standard fullforwardshadows
@@ -80,10 +94,7 @@
         sampler2D _TopTex;
         sampler2D _SideTex;
         float _TextureScale;
-        float _TriplanarBlendSharpness;
-
-
-
+        float _BlendSharpness;
 
         
         struct Input
@@ -102,7 +113,7 @@
             float3 yDiffuse = tex2D(_TopTex, yUV);
             float3 zDiffuse = tex2D(_SideTex, zUV);
 
-            float3 blendWeights = pow(abs(IN.worldNormal), _TriplanarBlendSharpness);
+            float3 blendWeights = pow(abs(IN.worldNormal), _BlendSharpness);
             blendWeights = blendWeights / (blendWeights.x + blendWeights.y + blendWeights.z);
 
 
@@ -111,7 +122,7 @@
         }
         
         ENDCG
-            */
+        
     }
     FallBack "Diffuse"
 }
