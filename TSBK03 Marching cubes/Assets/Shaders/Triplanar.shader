@@ -16,8 +16,8 @@
     {
         Tags { "RenderType"="Opaque" "Queue" = "Geometry"}
         LOD 200
-        /*
-        Pass
+
+        /*Pass
         {
             CGPROGRAM
             #pragma vertex vert
@@ -55,7 +55,7 @@
                 //calculate world normal
                 float3 worldNormal = mul(v.normal, (float3x3)unity_WorldToObject);
                 o.normal = normalize(worldNormal);
-                
+
                 return o;
             }
 
@@ -83,7 +83,7 @@
             }
         ENDCG
         }*/
-        
+
         CGPROGRAM
         // Physically based Standard lighting model, and enable shadows on all light types
         #pragma surface surf Standard fullforwardshadows
@@ -96,7 +96,7 @@
         float _TextureScale;
         float _BlendSharpness;
 
-        
+
         struct Input
         {
             float3 worldPos;
@@ -120,9 +120,9 @@
 
             o.Albedo = xDiffuse * blendWeights.x + yDiffuse * blendWeights.y + zDiffuse * blendWeights.z;
         }
-        
+
         ENDCG
-        
+
     }
     FallBack "Diffuse"
 }

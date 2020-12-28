@@ -7,12 +7,6 @@ public class WorldGenerator : MonoBehaviour
 {
  	Dictionary<Vector3Int, Chunk> chunkDict = new Dictionary<Vector3Int, Chunk>();
 
-	bool isUpdated = false;
-	//MeshFilter meshFilter;
-
-	//List<Vector3> vertices = new List<Vector3>();
-	//List<int> triangles = new List<int>();
-	//private float[] densityArray;
 	private Vector3[] vertices;
 	private int[] triangles;
 
@@ -22,7 +16,6 @@ public class WorldGenerator : MonoBehaviour
 	int numPoints;
 
 	const int threadGroupSize = 8;
-	int kernel;
 
 	[Header("Chunk settings")]
 	public int chunks_xz = 10;
@@ -52,20 +45,11 @@ public class WorldGenerator : MonoBehaviour
 
 	private void Start()
 	{
-		//kernel = shader.FindKernel("CSMain");
-
-		// Buffer for the noise values in a chunk
 
 		GenerateChunks();
 		UpdateChunks();
-		//Run();
 	}
-	/*private void GenerateTerrain(Vector3Int chunkPos)
-	{
-		GenerateNoise(chunkPos);
-
-		MarchCubes();
-	}*/
+	
 	private void GenerateNoise(Vector3Int chunkPos)
 	{
 		float[] densityArray;
@@ -89,19 +73,13 @@ public class WorldGenerator : MonoBehaviour
 
 		densityArray = new float[numPoints];
 		pointsBuffer.GetData(densityArray);
-		//Debug.Log(densityArray[0]);
 		chunkDict[chunkPos].densityArray = densityArray;
-		/*foreach (float i in densityArray)
-		{
-			Debug.Log(i);
-		}*/
 		pointsBuffer.Release();
 
 	}
 	private void MarchCubes(float[] densityArray)
 	{
-		//Debug.Log(densityArray[0]);
-		//Debug.Log(densityArray.Length);
+	
 		pointsBufferMarch = new ComputeBuffer(numPoints, sizeof(float));
 		pointsBufferMarch.SetData(densityArray);
 
@@ -138,13 +116,6 @@ public class WorldGenerator : MonoBehaviour
 
 		for (int i = 0; i < numTris; i++)
 		{
-			//for (int j = 0; j < 3; j++)
-			//{
-			//	triangles[i * 3 + j] = i * 3 + j;
-			//	vertices[i * 3 + 0] = tris[i].vertex0;
-			//	vertices[i * 3 + 1] = tris[i].vertex1;
-			//	vertices[i * 3 + 2] = tris[i].vertex2;
-			//}
 			triangles[i * 3 + 0] = i * 3 + 0;
 			triangles[i * 3 + 1] = i * 3 + 1;
 			triangles[i * 3 + 2] = i * 3 + 2;
@@ -153,28 +124,10 @@ public class WorldGenerator : MonoBehaviour
 			vertices[i * 3 + 2] = tris[i].vertex2;
 
 		}
-		//ClearMesh();
-		//generateTerrain();
-		//CreateMesh();
-		//BuildMesh();
 
 		pointsBufferMarch.Release();
 		triangleBuffer.Release();
 		triCountBuffer.Release();
-
-		//isUpdated = false;
-	}
-	private void Run(Vector3Int chunkPos)
-	{
-		
-
-		
-	}
-
-	void ClearMesh()
-	{
-		//vertices.Clear();
-		//triangles.Clear();
 	}
 
 	void OnValidate()
@@ -188,9 +141,6 @@ public class WorldGenerator : MonoBehaviour
 		mesh.vertices = vertices;
 		mesh.triangles = triangles;
 		mesh.RecalculateNormals();
-		//chunk.meshFilter.mesh = mesh;
-
-		//Debug.Log(mesh.vertexCount);
 		return mesh;
 	}
 
@@ -224,34 +174,17 @@ public class WorldGenerator : MonoBehaviour
 	}
 	void UpdateChunk(Vector3Int chunkPos)
 	{
-		/*foreach (KeyValuePair<Vector3Int, Chunk> i in chunkDict)
-		{
-			MarchCubes(i.Value.densityArray);
-			Mesh mesh = BuildMesh();
-			i.Value.meshFilter.mesh = mesh;
-			i.Value.meshCollider.sharedMesh = i.Value.meshFilter.sharedMesh;
-		}*/
-		//Debug.Log(chunkDict[chunkPos].densityArray.Length);
 		MarchCubes(chunkDict[chunkPos].densityArray);
-		//Debug.Log(vertices.Length);
-		//Debug.Log(triangles.Length);
-		//chunkDict[chunkPos].meshFilter.mesh.vertices = vertices;
-		//hunkDict[chunkPos].meshFilter.mesh.triangles = triangles;
-		//chunkDict[chunkPos].meshFilter.mesh.RecalculateNormals();
 		Mesh mesh = BuildMesh();
 		chunkDict[chunkPos].meshFilter.mesh = mesh;
 		chunkDict[chunkPos].meshCollider.sharedMesh = chunkDict[chunkPos].meshFilter.sharedMesh;
-		//chunkDict[chunkPos].meshCollider.sharedMesh = chunkDict[chunkPos].meshFilter.sharedMesh;
 	}
 	public void EditTerrain(Vector3 pointHit, float radius, float newDensityVal)
 	{
-		//Debug.Log(pointHit);
 		
 		Vector3Int chunkPos = new Vector3Int((int)(pointHit.x/chunkSize)*chunkSize, (int)(pointHit.y / chunkSize) * chunkSize, (int)(pointHit.z / chunkSize)*chunkSize);
 		int rad = Mathf.FloorToInt(radius);
 		Vector3Int pointHitInt = new Vector3Int(Mathf.CeilToInt(pointHit.x), Mathf.CeilToInt(pointHit.y), Mathf.CeilToInt(pointHit.z));
-		//Debug.Log(chunkPos);
-		//GenerateNoise(chunkPos);
 
 		for (int x = -rad; x <= rad; x++)
 		{
@@ -260,15 +193,12 @@ public class WorldGenerator : MonoBehaviour
 				for (int z = -rad; z <= rad; z++)
 				{
 					
-					//Vector3Int newChunkPos = new Vector3Int(x+chunkPos.x * chunkSize, y+chunkPos.y * chunkSize, z+chunkPos.z * chunkSize); //*chunkSize??
-					
 					if (chunkDict.TryGetValue(chunkPos, out Chunk chunk))
 					{
 						Vector3Int worldCoord = pointHitInt;
 						worldCoord = worldCoord - new Vector3Int(chunkPos.x+x, chunkPos.y + y, chunkPos.z + z);
 						int index = indexFromCoord(worldCoord.x, worldCoord.y, worldCoord.z, numPointsPerAxis);
-						//Debug.Log(newChunkPos);
-						//chunk.densityArray[index] = newDensityVal;
+
 						if(newDensityVal > 0)
 							chunkDict[chunkPos].densityArray[index] = Vector3Int.Distance(worldCoord, pointHitInt);
 						else
@@ -288,25 +218,4 @@ public class WorldGenerator : MonoBehaviour
 		return x + w * (y + w * z);
 		//return z * w * w + y * w + x;
 	}
-	public Chunk GetChunkFromVector3(Vector3 pos)
-	{
-
-		int x = (int)pos.x;
-		int y = (int)pos.y;
-		int z = (int)pos.z;
-
-		return chunkDict[new Vector3Int(x, y, z)];
-
-	}
-	/*public void PlaceTerrain(Vector3 pos)
-	{
-
-		Vector3Int v3Int = new Vector3Int(Mathf.CeilToInt(pos.x), Mathf.CeilToInt(pos.y), Mathf.CeilToInt(pos.z));
-		Vector3Int chunkPos = new Vector3Int((int)(pos.x / chunkSize) * chunkSize, (int)(pos.y / chunkSize) * chunkSize, (int)(pos.z / chunkSize) * chunkSize);
-		v3Int -= chunkPos;
-		int index = indexFromCoord(v3Int.x, v3Int.y, v3Int.z, numPointsPerAxis);
-		densityArray[index] = 0f;
-		UpdateChunk(chunkPos);
-
-	}*/
 }

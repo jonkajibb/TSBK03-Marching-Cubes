@@ -10,7 +10,6 @@ public class Chunk
 	public MeshFilter meshFilter;
 	public Vector3Int chunkPosition;
 	//public Material material;
-	const int size = 100000;
 	public float[] densityArray;
 
 	Material triplanarMat;
@@ -29,6 +28,5 @@ public class Chunk
 		meshRenderer.material = new Material(Shader.Find("Diffuse"));
 		//meshRenderer.material = material;
 
-		densityArray = new float[size];
 	}
 }
